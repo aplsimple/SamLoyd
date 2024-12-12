@@ -31,3 +31,15 @@ The downloaded files are stand-alone Tcl/Tk builds of size about 6 Mb:
   - [wish v9.0 for Linux x86_64](https://github.com/aplsimple/tclbag/releases/download/wish9.0/wish-lin64-9.0.zip)
 
   - [wish v9.0 for Windows x86_64](https://github.com/aplsimple/tclbag/releases/download/wish9.0/wish-win64-9.0.zip)
+
+# Pictures
+
+The picture of puzzle #279 from Sam Loyd's book "Mathematical Puzzles":
+
+<img src="https://github.com/aplsimple/SamLoyd/releases/download/SamLoyd-0.0.1/samloyd279.jpg" class="media" alt="">
+
+and two corresponding screenshots:
+
+<img src="https://github.com/aplsimple/SamLoyd/releases/download/SamLoyd-0.0.1/samloyd279no.png" class="media" alt="">
+
+<img src="https://github.com/aplsimple/SamLoyd/releases/download/SamLoyd-0.0.1/samloyd279ok.png" class="media" alt="">
