@@ -112,8 +112,8 @@ oo::class create samloyd279::Puzzle {
 
   variable TITLE SRCNUMBER TRGNUMBER PCERADIUS PI FONTLARGE FONTSMALL
   variable TTLHEIGHT TOOLHEIGHT MSGHEIGHT MARGIN HEIGHT WIDTH WIDTH1 WIDTH2
-  variable BGSUCCESS BGMOVED BGMOVED1 BGPENDING BGCANVAS BGWAIT BGMSG
-  variable BGSUCCESS2 BGMOVED2 BGPENDING2 BGWAIT2
+  variable BGSUCCESS BGPENDING BGPENDING1 BGBAD BGCANVAS BGWAIT BGMSG
+  variable BGSUCCESS2 BGPENDING2 BGBAD2 BGWAIT2
   variable Win Solo Wcan1 Wcan2 Wcan3 Wcan4 D
 
 constructor {wpar solo cnum} {
@@ -156,13 +156,13 @@ constructor {wpar solo cnum} {
   set WIDTH [expr {$WIDTH1 + $WIDTH2 + $MARGIN*3}]
   #colors
   set BGCANVAS black      ;# canvas background
-  set BGSUCCESS  #006000  ;# successful piece
+  set BGSUCCESS  #218121  ;# successful piece
   set BGSUCCESS2 #004000  ;# border of successful piece
-  set BGPENDING  #800000  ;# pending piece
-  set BGPENDING2 #400000  ;# border of pending piece
-  set BGMOVED    #abab31  ;# moved piece
-  set BGMOVED1   #ffff00  ;# border of moved piece being in target
-  set BGMOVED2   #4e4e0e  ;# border of moved piece
+  set BGBAD      #ff4243  ;# bad piece
+  set BGBAD2     #400000  ;# border of bad piece
+  set BGPENDING  #d9d900  ;# pending piece
+  set BGPENDING1 #ff9d00  ;# border of pending piece
+  set BGPENDING2 #4e4e0e  ;# border of pending piece
   set BGWAIT     #808080  ;# piece waiting
   set BGWAIT2    #464646  ;# border of pieces waiting
   set BGMSG      #ff6bff  ;# message
@@ -198,11 +198,6 @@ constructor {wpar solo cnum} {
   tkwait visibility $Win
   tkwait window $Win
 }
-#_______________________
-
-destructor {
-  catch {if {$Solo} {destroy $Win}}
-}
 
 ## ________________________ Build GUI _________________________ ##
 
@@ -223,16 +218,14 @@ method BuildSource {} {
     set x [expr {$rm*$multy + $shiftX}]
     set y [expr {entier($ic/4)*$multy + $shiftY}]
     set xy2 [list [expr {$x-$r}] [expr {$y-$r}] [expr {$x+$r}] [expr {$y+$r}]]
-    set id [$Wcan3 create oval $xy2 -fill $BGMOVED -outline $BGMOVED2]
+    set id [$Wcan3 create oval $xy2 -fill $BGPENDING -outline $BGPENDING2]
     set D(Src$id) [list $id {*}$xy2]
     set D(Src,$ic) $id
-    $Wcan3 bind $id <ButtonPress> "[self] OnButtonPress Src$id"
-    $Wcan3 bind $id <ButtonRelease> "[self] OnButtonRelease"
-    $Wcan3 bind $id <Motion> "[self] OnButtonMotion"
+    my BindSource $id $id
     set D(busy,$id) 0
   }
   $Wcan3 create text [expr {($X2+$MARGIN)/2}] [expr {$Y2/1.1}] \
-    -text source -fill $BGMOVED -font $FONTSMALL
+    -text source -fill $BGPENDING -font $FONTSMALL
 }
 #_______________________
 
@@ -245,13 +238,13 @@ method BuildTarget {} {
   set cY [expr {$HEIGHT/2}]
   set cR [expr {$cY - $PCERADIUS - $eps}]
   set cRC [expr {($cR - $PCERADIUS)/$cR}]  ;# for the joint of lines
-  # get piece centers & numerate pieces
+  # get targets & numerate them
   array set D [list]
   set r $PCERADIUS
   set sect [expr {2*$PI/$TRGNUMBER}]
   for {set ic 0} {$ic<$TRGNUMBER} {incr ic} {
-    set x [expr {round($cX + $cR*cos($ic*$sect)) - 10}]
-    set y [expr {round($cY + $cR*sin($ic*$sect))}]
+    set x [expr {$cX + $cR*cos($ic*$sect) - 10}]
+    set y [expr {$cY + $cR*sin($ic*$sect)}]
     set D($ic,xy) [list $x $y]
     set xy2 [list [expr {int($x-$r)}] [expr {int($y-$r)}] \
       [expr {int($x+$r)}] [expr {int($y+$r)}]]
@@ -259,8 +252,9 @@ method BuildTarget {} {
     set D(Trg$ic) [list $id $xy2]
     set D(busy,$id) 0
     set N [expr {(($ic+5)%$TRGNUMBER)+1}]  ;# numerate as shown in Loyd's book
-    if {$N>9} {incr x -2}
-    $Wcan3 create text $x [incr y 2] -text $N -fill $BGWAIT2 -font $FONTSMALL
+    if {$N>9} {set x [expr {$x - 2}]}
+    set y [expr {$y + 2}]
+    set D(N$id) [$Wcan3 create text $x $y -text $N -fill $BGWAIT2 -font $FONTSMALL]
   }
   # get move lines
   set D(Neighbors) [list]
@@ -328,15 +322,34 @@ method OnButtonPress {key} {
     my PlaceToSource $id
     return
   }
+  switch [incr D(click)] {
+    2 - 3 {
+      if {$D(dndXY) ne {}} {
+        my OnButtonRelease
+      } else {
+        my PlaceToSource $id
+      }
+      set D(click) 0
+      return
+    }
+  }
   $Wcan3 raise $id
+  my ColorPiece $id $BGPENDING1 $BGPENDING2
   set D(dndXY) [list [winfo pointerx $Win] [winfo pointery $Win] $id]
+  set D(dndtime) [clock milliseconds]
 }
 #_______________________
 
 method OnButtonMotion {} {
   # Handles the mouse moving over a piece.
 
-  if {![info exists D(dndXY)] || $D(dndXY) eq {}} return
+  if {$D(dndXY) eq {}} return
+  set dndtime [clock milliseconds]
+  if {($dndtime-$D(dndtime))<30} {
+    after idle "[self] OnButtonMotion" ;# to be in time with cursor
+    return
+  }
+  set D(dndtime) $dndtime
   lassign $D(dndXY) x y id
   set x0 [winfo pointerx $Win]
   set y0 [winfo pointery $Win]
@@ -344,15 +357,20 @@ method OnButtonMotion {} {
   set movY [expr {$y0 - $y}]
   $Wcan3 move $id $movX $movY
   set D(dndXY) [list $x0 $y0 $id]
+  set D(click) 2
+  if {(abs($movX)+abs($movY))>10} {  ;# handling stops when cursor stops
+    my OnButtonMotion
+  }
 }
 #_______________________
 
 method OnButtonRelease {} {
   # Handles the mouse releasing a piece.
 
-  if {![info exists D(dndXY)] || $D(dndXY) eq {}} return
+  if {$D(click)<2} return
   lassign $D(dndXY) x y id
   set D(dndXY) {}
+  set D(click) 0
   lassign [my ItemCenter $id] x1 y1
   set min $WIDTH
   # get a target closest to the cursor
@@ -372,15 +390,18 @@ method OnButtonRelease {} {
     my PlaceToSource $id
   }
 }
+
 #_______________________
 
-method ItemCenter {id} {
-  # Gets an item's center.
-  #   id - item's ID
-  # Returns list {x y} of the center.
+method BindSource {id src} {
+  # Binds item to event, as a source piece.
+  #   id - item id
+  #   src - id of source
 
-  lassign [$Wcan3 coords $id] x1 y1 x2 y2
-  return [list [expr {$x1-1}] [expr {$y1-1}]]
+  $Wcan3 bind $id <ButtonPress> "[self] OnButtonPress Src$src"
+  $Wcan3 bind $id <ButtonRelease> "[self] OnButtonRelease"
+  $Wcan3 bind $id <Motion> "[self] OnButtonMotion"
+
 }
 
 ## ________________________ Managing _________________________ ##
@@ -391,7 +412,7 @@ method Start {} {
   # restore colors of source pieces
   for {set i 0} {$i<$SRCNUMBER} {incr i} {
     set id $D(Src,$i)
-    my ColorPiece $id $BGMOVED $BGMOVED2
+    my ColorPiece $id $BGPENDING $BGPENDING2
     set D(busy,$id) 0
   }
   # move pieces (if any) from target to source
@@ -402,6 +423,8 @@ method Start {} {
       set D(busy,$id) 0
     }
   }
+  set D(click) 0
+  set D(dndXY) {}
 }
 #_______________________
 
@@ -409,11 +432,12 @@ method VacateTarget {src} {
   # Vacates a target from a source piece.
   #   src - id of source
 
-  my ColorPiece $src $BGMOVED $BGMOVED2
+  my ColorPiece $src $BGPENDING $BGPENDING2
   for {set i 0} {$i<$TRGNUMBER} {incr i} {
     lassign $D(Trg$i) trg
     if {$D(busy,$trg)==$src} {
       set D(busy,$trg) 0
+      $Wcan3 bind $D(N$trg) <ButtonPress> {}
     }
   }
 }
@@ -435,8 +459,8 @@ method PlaceToTarget {src trg } {
   #   src - id of source
   #   trg - id of target
 
-  set color1 $BGMOVED1
-  set color2 $BGMOVED2
+  set color1 $BGPENDING
+  set color2 $BGPENDING2
   set oldtrg $D(busy,$src)
   if {$oldtrg == $trg} { ;# local moving inside current piece
     my MoveToTarget $src $oldtrg $color1 $color2
@@ -458,8 +482,8 @@ method PlaceToTarget {src trg } {
     if {![llength $neighbors]} {
       my Message {No moves for this piece}  ;# 2nd step impossible
       set D(busy,$src) -$trg
-      set color1 $BGPENDING
-      set color2 $BGPENDING2
+      set color1 $BGBAD
+      set color2 $BGBAD2
     }
   } else {
     set neighbors [my Neighbors $oldtrg]
@@ -488,6 +512,8 @@ method MoveToTarget {src trg color1 color2} {
   $Wcan3 moveto $src $x $y
   set D(busy,$trg) $src
   my ColorPiece $src $color1 $color2
+  $Wcan3 raise $D(N$trg)
+  my BindSource $D(N$trg) $src
 }
 #_______________________
 
@@ -518,6 +544,16 @@ method Neighbors {trg} {
 }
 #_______________________
 
+method ItemCenter {id} {
+  # Gets an item's center.
+  #   id - item's ID
+  # Returns list {x y} of the center.
+
+  lassign [$Wcan3 coords $id] x1 y1 x2 y2
+  return [list [expr {$x1-1}] [expr {$y1-1}]]
+}
+#_______________________
+
 method End {} {
   # Checks if the puzzle is solved: all source pieces are fixed in target.
 
@@ -532,7 +568,6 @@ method End {} {
 }
 
 ## ________________________ Messages _________________________ ##
-
 
 method Message {msg {wait 0} {doit no}} {
   # Shows a message.
@@ -587,6 +622,11 @@ The 2nd move has to be only
 to a neighbor's neighbor
 which is shown with lines.
 E.g. (3) to (1) or (3) to (5).
+
+To move a source piece, you
+can drag-and-drop it. Or
+just click it, then move to
+a target and click again.
 
 The puzzle can be run so:
   wish samloyd279.tcl NP
