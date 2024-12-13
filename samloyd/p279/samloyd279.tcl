@@ -401,7 +401,6 @@ method BindSource {id src} {
   $Wcan3 bind $id <ButtonPress> "[self] OnButtonPress Src$src"
   $Wcan3 bind $id <ButtonRelease> "[self] OnButtonRelease"
   $Wcan3 bind $id <Motion> "[self] OnButtonMotion"
-
 }
 
 ## ________________________ Managing _________________________ ##
@@ -460,10 +459,6 @@ method PlaceToTarget {src trg } {
   set color1 $BGPENDING
   set color2 $BGPENDING2
   set oldtrg $D(busy,$src)
-  if {$oldtrg == $trg} { ;# local moving inside current piece
-    my MoveToTarget $src $oldtrg $color1 $color2
-    return
-  }
   if {$D(busy,$trg)} {
     my Message {This target isn't vacant}
     if {$oldtrg} {
