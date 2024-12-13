@@ -409,19 +409,17 @@ method BindSource {id src} {
 method Start {} {
   # Initializes source & target.
 
-  # restore colors of source pieces
+  # restore source pieces
   for {set i 0} {$i<$SRCNUMBER} {incr i} {
     set id $D(Src,$i)
     my ColorPiece $id $BGPENDING $BGPENDING2
+    my PlaceToSource $id
     set D(busy,$id) 0
   }
-  # move pieces (if any) from target to source
+  # restore targets
   for {set i 0} {$i<$TRGNUMBER} {incr i} {
     lassign $D(Trg$i) id
-    if {$D(busy,$id)} {
-      my PlaceToSource [expr {abs($D(busy,$id))}]
-      set D(busy,$id) 0
-    }
+    set D(busy,$id) 0
   }
   set D(click) 0
   set D(dndXY) {}
