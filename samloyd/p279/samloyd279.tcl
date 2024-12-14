@@ -7,13 +7,23 @@
 # License: MIT.
 ###########################################################
 
-# _________________________ samloyd279 ________________________ #
-
 package require Tk
 
 namespace eval samloyd279 {
 
   variable defaultPieceNumber 12
+
+  proc run {{w .} {cnum ""} {solo no}} {
+    # Runs the puzzle.
+    #   w - parent window
+    #   cnum - number of pieces
+    #   solo - true, if runs as stand-alone app
+
+    variable defaultPieceNumber
+    if {$cnum eq {}} {set cnum $defaultPieceNumber}
+    [Puzzle new $w $solo $cnum] destroy
+    if {$solo} exit
+  }
 
   image create photo samloyd279::runImage -data {iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAC+lBMVEUAAACBAABsAABiAwNkAAB/
 AACRAwNxDA2HBwdrBweRBgZxAACRAABkAABnAACJAABuAAB+AACOAABgAABfAAB+AACXXmO7YGC6
@@ -42,7 +52,6 @@ PU+EHTbv0zPngMNw7d2O8DSQgqiUc8wIBR5LZoIjYVH+2vldICsqdvbs69dFKBBVicuOj4kARUJT
 b0rF7p4j/XdmyCOZwGA2PxsSCWv+Xttz6uozWXZmAX/khOu8eG71grql31b/+vN5hjY3Lwt6khRa
 +eHT4q8r17EpmTr5iGLLC5pLlq1T5bATZMSVH3h0rPhZmRgGAgAA43LedPuyX/QAAAAASUVORK5C
 YII=}
-
   image create photo samloyd279::helpImage -data {iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAB8lBMVEUAAABngsVAOYZIV5hJUpVK
 TZJqhcZHXJtLSZFCO4gyLoBhfsRaeMFXVbRPcsVNSZE4UpMsKHsKOacBIWwCAnsAACQAAACaz/+D
 t//A4v8shP+p1v/I5f9fn/+74P9mpv99uP9xr/+23f8GCQyq2P+Xzf+OyP9prf91dsC75v+w3P+b
@@ -61,7 +70,6 @@ QPGJGXD9zpEFYITDANgbNgDQS6p6nQC3Wk9QuWmmwI2EV2cFcHQzvFA8DODsZ/Pq3gHwPoZfiLGL
 j7HSaTIzCwkmr0xV/Dw0SN8ymXpkaIDtfQJ86RRIUPAAVI+NaHDvBndogG2PAVh6lf8cyR08qycQ
 R1aLx7Gy7CmJVK5oXvIcbaBMUDtL8AUqzfzv6lfXW+izjyypn+ERcv6cQJnX1NSc2bbYEEMDcdFB
 Qf5UAVQsFis4OCo0wcdL/QAftmvBghRUFAAAAABJRU5ErkJggg==}
-
   image create photo samloyd279::exitImage -data {iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAC7lBMVEUAAACCAABpAACbAAChAABt
 AAB0AAB8AwNkAQFmAQCLAQB2AQGRAACjAABpAACXAABYAACdAABaAABfAAByAABqAAB8AACBAACM
 AACUAACmAAB7AABeAACIAABtAACUAACoAACjAABeAAB0AACPAACWAACpAACnAACtDQqlAAClAABk
@@ -90,18 +98,6 @@ oYSITlnPa66ZXnHBgWYgYNT+eetHm/W6yAkKMPFVN11XmC7uqggLq+hI9fOxsWEXQElSbGJrZru+
 tc3Ny87Os/P1MPFYL6CPliil2d+nPF2YZm1t7W5i7cmhB9OPAKwi3Kutlrq5LVu5llNICWvOUJYT
 5WNi0hGWYWVkoCcAAOTi2xaCYJqcAAAAAElFTkSuQmCC}
 
-  proc run {{w .} {cnum ""} {solo no}} {
-    # Runs the puzzle.
-    #   w - parent window
-    #   cnum - number of pieces
-    #   solo - true, if runs as stand-alone app
-
-    variable defaultPieceNumber
-    if {$cnum eq {}} {set cnum $defaultPieceNumber}
-    [Puzzle new $w $solo $cnum] destroy
-    if {$solo} exit
-  }
-
   ## ________________________ EONS _________________________ ##
 
 }
@@ -117,7 +113,7 @@ oo::class create samloyd279::Puzzle {
   variable Win Solo Wcan1 Wcan2 Wcan3 Wcan4 D
 
 constructor {wpar solo cnum} {
-  # Puzzle constructor.
+  # Constructs and runs the puzzle.
   #   wpar - path to parent window
   #   solo - true, if runs as stand-alone app
   #   cnum - number of pieces
@@ -133,7 +129,7 @@ constructor {wpar solo cnum} {
   # methods available only during the puzzle
   oo::objdefine [self] {
     export Message ShowHelp CheckMessage Start \
-      OnButtonPress OnButtonMotion OnButtonRelease
+      OnButtonPress OnButtonMotion OnButtonRelease OnPressTarget
   }
   # common data
   set npzl 279
@@ -166,10 +162,32 @@ constructor {wpar solo cnum} {
   set BGWAIT     #808080  ;# piece waiting
   set BGWAIT2    #464646  ;# border of pieces waiting
   set BGMSG      #ff6bff  ;# message
+  # build & run the puzzle
   set wpar [string trimright [winfo toplevel $wpar] .]
   set Win $wpar.samloyd$npzl
   toplevel $Win
   wm withdraw $Win
+  my BuildMain
+  my BuildSource
+  my BuildTarget
+  my BuildAccessories
+  my Start
+  bind $Win <Escape> "destroy $Win"
+  bind $Win <F1> "[self] ShowHelp"
+  bind $Win <Button> "[self] CheckMessage"
+  update
+  wm resizable $Win 0 0
+  ::tk::PlaceWindow $Win widget $wpar
+  wm deiconify $Win
+  tkwait visibility $Win
+  tkwait window $Win
+}
+
+## ________________________ Build GUI _________________________ ##
+
+method BuildMain {} {
+  # Builds main frames of the puzzle.
+
   set Wcan  $Win.can
   set Wcan1 ${Wcan}1  ;# title
   set Wcan2 ${Wcan}2  ;# tools
@@ -185,21 +203,8 @@ constructor {wpar solo cnum} {
     -highlightthickness 1 -highlightbackground $BGCANVAS]
   pack [canvas $Wcan4 -width $WIDTH -height $MSGHEIGHT -bg $BGCANVAS \
     -highlightthickness 1 -highlightbackground $BGCANVAS]
-  my BuildSource
-  my BuildTarget
-  my BuildAccessories
-  bind $Win <Escape> "destroy $Win"
-  bind $Win <F1> "[self] ShowHelp"
-  bind $Win <Button> "[self] CheckMessage"
-  update
-  wm resizable $Win 0 0
-  ::tk::PlaceWindow $Win widget $wpar
-  wm deiconify $Win
-  tkwait visibility $Win
-  tkwait window $Win
 }
-
-## ________________________ Build GUI _________________________ ##
+#_______________________
 
 method BuildSource {} {
   # Builds the source box.
@@ -209,15 +214,14 @@ method BuildSource {} {
   set X2 $WIDTH1
   set Y2 [expr {$HEIGHT-$Y1}]
   set id [$Wcan3 create polygon $X1 $Y1 $X2 $Y1 $X2 $Y2 $X1 $Y2 -outline $BGWAIT]
-  set r $PCERADIUS
-  set multy [expr {$r*2.6}]
-  set shiftX [expr {$X1 + $r*1.6}]
-  set shiftY [expr {$Y1 + $r*1.6}]
+  set multy [expr {$PCERADIUS*2.6}]
+  set shiftX [expr {$X1 + $PCERADIUS*1.6}]
+  set shiftY [expr {$Y1 + $PCERADIUS*1.6}]
   for {set ic 0} {$ic<$SRCNUMBER} {incr ic} {
     set rm [expr {$ic%4}]
-    set x [expr {$rm*$multy + $shiftX}]
-    set y [expr {entier($ic/4)*$multy + $shiftY}]
-    set xy2 [list [expr {$x-$r}] [expr {$y-$r}] [expr {$x+$r}] [expr {$y+$r}]]
+    set x [expr {int($rm*$multy + $shiftX)}]
+    set y [expr {int($ic/4*$multy + $shiftY)}]
+    set xy2 [my OriginalCoords $x $y]
     set id [$Wcan3 create oval $xy2 -fill $BGPENDING -outline $BGPENDING2]
     set D(Src$id) [list $id {*}$xy2]
     set D(Src,$ic) $id
@@ -225,29 +229,27 @@ method BuildSource {} {
     set D(busy,$id) 0
   }
   $Wcan3 create text [expr {($X2+$MARGIN)/2}] [expr {$Y2/1.1}] \
-    -text source -fill $BGPENDING -font $FONTSMALL
+    -text Source -fill $BGPENDING -font $FONTSMALL
 }
 #_______________________
 
 method BuildTarget {} {
   # Builds the target carousel.
 
-  # first, get center & radius of carousel
+  # get center & radius of carousel
   set eps 8
   set cX [expr {$WIDTH - ($WIDTH2 + $MARGIN*3)/2 + $eps}]
   set cY [expr {$HEIGHT/2}]
-  set cR [expr {$cY - $PCERADIUS - $eps}]
-  set cRC [expr {($cR - $PCERADIUS)/$cR}]  ;# for the joint of lines
+  set cR [expr {$cY - $PCERADIUS - 2*$eps}]
+  set cRC [expr {($cR - $PCERADIUS)/$cR}]  ;# for joints of lines
   # get targets & numerate them
   array set D [list]
-  set r $PCERADIUS
   set sect [expr {2*$PI/$TRGNUMBER}]
   for {set ic 0} {$ic<$TRGNUMBER} {incr ic} {
-    set x [expr {$cX + $cR*cos($ic*$sect) - 10}]
-    set y [expr {$cY + $cR*sin($ic*$sect)}]
+    set x [expr {int($cX + $cR*cos($ic*$sect) - 10)}]
+    set y [expr {int($cY + $cR*sin($ic*$sect))}]
     set D($ic,xy) [list $x $y]
-    set xy2 [list [expr {int($x-$r)}] [expr {int($y-$r)}] \
-      [expr {int($x+$r)}] [expr {int($y+$r)}]]
+    set xy2 [my OriginalCoords $x $y]
     set id [$Wcan3 create oval $xy2 -fill $BGWAIT -outline $BGWAIT2 -tag Trg$ic]
     set D(Trg$ic) [list $id $xy2]
     set D(busy,$id) 0
@@ -255,6 +257,8 @@ method BuildTarget {} {
     if {$N>9} {set x [expr {$x - 2}]}
     set y [expr {$y + 2}]
     set D(N$id) [$Wcan3 create text $x $y -text $N -fill $BGWAIT2 -font $FONTSMALL]
+    $Wcan3 bind $id <ButtonPress> "[self] OnPressTarget $id"
+    $Wcan3 bind $D(N$id) <ButtonPress> "[self] OnPressTarget $id"
   }
   # get move lines
   set D(Neighbors) [list]
@@ -262,10 +266,10 @@ method BuildTarget {} {
     set ic2 [expr {($ic1+2)%$TRGNUMBER}]
     lassign $D($ic1,xy) x1 y1
     lassign $D($ic2,xy) x2 y2
-    set x1 [expr {$cX+($x1-$cX)*$cRC}]  ;# coordinates of lines
-    set x2 [expr {$cX+($x2-$cX)*$cRC}]
-    set y1 [expr {$cY+($y1-$cY)*$cRC}]
-    set y2 [expr {$cY+($y2-$cY)*$cRC}]
+    set x1 [expr {$cX+($x1-$cX)*$cRC-1}]  ;# coordinates of lines
+    set x2 [expr {$cX+($x2-$cX)*$cRC-1}]
+    set y1 [expr {$cY+($y1-$cY)*$cRC-1}]
+    set y2 [expr {$cY+($y2-$cY)*$cRC-1}]
     set id [$Wcan3 create polygon $x1 $y1 $x2 $y2 -outline $BGWAIT]
     set D(Trg$ic1,id1) $id
     set D(Trg$ic2,id2) $id
@@ -273,18 +277,14 @@ method BuildTarget {} {
     lassign $D(Trg$ic2) id2
     lappend D(Neighbors) [list $id1 $id2]
   }
-  $Wcan3 create text $cX $cY -text target -fill $BGWAIT -font $FONTSMALL
-  my Start
+  $Wcan3 create text $cX $cY -text Target -fill $BGWAIT -font $FONTSMALL
 }
 #_______________________
 
 method BuildAccessories {} {
-  # Builds accessories (title, tools, hint).
+  # Builds accessories (title, tools).
 
   $Wcan1 create text [expr {$WIDTH/2}] 30 -text $TITLE -fill $BGMSG -font $FONTLARGE
-  my Message {Try to move pieces from the source to the target}
-  set x $MARGIN
-  set y 20
   set shift 40
   set pad 8
   grid [button $Wcan2.but1 -image samloyd279::runImage -bg $BGCANVAS \
@@ -310,33 +310,250 @@ method BuildAccessories {} {
   }
 }
 
-## ________________________ Drag-n-drop _________________________ ##
+## ________________________ Managing _________________________ ##
+
+method Start {} {
+  # Starts the puzzle.
+
+  # restore source pieces
+  for {set i 0} {$i<$SRCNUMBER} {incr i} {
+    set id $D(Src,$i)
+    my ColorPiece $id $BGPENDING $BGPENDING2
+    my PlaceToSource $id
+    set D(busy,$id) 0
+  }
+  # restore targets
+  for {set i 0} {$i<$TRGNUMBER} {incr i} {
+    lassign $D(Trg$i) id
+    set D(busy,$id) 0
+  }
+  set D(click) 0
+  set D(dndXY) {}
+  my Message {Moving pieces from Source to Target}
+}
+#_______________________
+
+method VacateTarget {src} {
+  # Vacates target and linked (possibly) source.
+  #   src - id of source
+
+  my ColorPiece $src $BGPENDING $BGPENDING2
+  for {set i 0} {$i<$TRGNUMBER} {incr i} {
+    lassign $D(Trg$i) trg
+    if {$D(busy,$trg)==$src} {
+      set D(busy,$trg) 0
+      set D(busy,$src) 0
+      $Wcan3 bind $D(N$trg) <ButtonPress> "[self] OnPressTarget $trg"
+      $Wcan3 raise $D(N$trg)
+    }
+  }
+}
+#_______________________
+
+method PlaceToSource {src} {
+  # Places piece to source.
+  #   src - id of source
+
+  lassign $D(Src$src) -> x y
+  $Wcan3 moveto $src $x $y
+  set D(busy,$src) 0
+  my VacateTarget $src
+  my ColorNeighborLines
+}
+#_______________________
+
+method PlaceToTarget {src trg } {
+  # Places source piece to target.
+  #   src - id of source
+  #   trg - id of target
+
+  set color1 $BGPENDING
+  set color2 $BGPENDING2
+  set oldtrg $D(busy,$src)
+  if {$D(busy,$trg)} {
+    if {$trg != $oldtrg} {my Message {This target isn't vacant}}
+    if {$oldtrg} {
+      my MoveToTarget $src $oldtrg $color1 $color2  ;# return to old target
+    } else {
+      my PlaceToSource $src  ;# return to source
+    }
+    return
+  }
+  my VacateTarget $src
+  if {!$oldtrg} {
+    set D(busy,$src) $trg  ;# flag "this target has to be fixed"
+    set neighbors [my Neighbors $trg]
+    if {![llength $neighbors]} {
+      my Message {No moves for the piece}
+      set D(busy,$src) -$trg   ;# flag  "2nd step impossible"
+      set color1 $BGBAD
+      set color2 $BGBAD2
+    }
+  } else {
+    set neighbors [my Neighbors $oldtrg]
+    if {$trg ni $neighbors} {
+      if {$trg != $oldtrg} {
+        my Message {The move isn't correct} ;# neighbors not available
+        set D(busy,$src) $oldtrg
+      }
+      set trg $oldtrg
+    } else {
+      set D(busy,$src) -1    ;# flag  "this piece is fixed"
+      set color1 $BGSUCCESS
+      set color2 $BGSUCCESS2
+      my End
+    }
+  }
+  my MoveToTarget $src $trg $color1 $color2
+  my ColorNeighborLines
+}
+#_______________________
+
+method MoveToTarget {src trg color1 color2} {
+  # Moves source piece to target.
+  #   src - id of source
+  #   trg - id of target
+  #   color1 - fill color
+  #   color2 - outline color
+
+  lassign [my CurrentCoords $trg] x y
+  $Wcan3 moveto $src $x $y
+  set D(busy,$trg) $src
+  my ColorPiece $src $color1 $color2
+  $Wcan3 raise $D(N$trg)
+  my BindSource $D(N$trg) $src
+}
+#_______________________
+
+method ColorPiece {id color1 color2} {
+  # Colors source piece and its possible target lines.
+  #   id - ID of source piece
+  #   color1 - fill color
+  #   color2 - outline color
+
+  $Wcan3 itemconfigure $id -fill $color1 -outline $color2
+}
+#_______________________
+
+method ColorNeighborLines {} {
+  # Colors pathes to neighbors.
+
+  # through colors: normal (free cell), yellow (pending cell), red (bad cell)
+  foreach color [list $BGWAIT $BGPENDING $BGBAD] {
+    for {set i 0} {$i<$TRGNUMBER} {incr i} {
+      lassign $D(Trg$i) trg
+      set linecolor $BGWAIT
+      set src $D(busy,$trg)  ;# id of placed source
+      set flag [expr {$src ? $D(busy,$src) : 0}]
+      set neighbors [my Neighbors $trg]
+      if {$color eq $BGPENDING} {
+        if {$flag>0} {
+          if {[llength $neighbors]} {  ;# good cell?
+            set linecolor $color
+          } else {
+            set linecolor $BGBAD       ;# no, it become bad
+            my VacateTarget $src
+            my PlaceToTarget $src $trg
+          }
+        } else {
+          continue
+        }
+      } elseif {$color eq $BGBAD} {
+        if {$flag<-1} {                ;# bad cell?
+          if {[llength $neighbors]} {
+            set linecolor $BGPENDING   ;# no, it become good
+            my VacateTarget $src
+            my PlaceToTarget $src $trg
+          } else {
+            set linecolor $color
+          }
+        } else {
+          continue
+        }
+      }
+      $Wcan3 itemconfigure $D(Trg$i,id1) -outline $linecolor
+      $Wcan3 itemconfigure $D(Trg$i,id2) -outline $linecolor
+    }
+  }
+}
+#_______________________
+
+method Neighbors {trg} {
+  # Get available neighbors for a target (2, 1 or 0).
+  #   trg - id of target
+
+  set neighbors [list]
+  foreach neib $D(Neighbors) {
+    lassign $neib trg1 trg2
+    if {$trg1==$trg && !$D(busy,$trg2)} {
+      lappend neighbors $trg2
+    } elseif {$trg2==$trg && !$D(busy,$trg1)} {
+      lappend neighbors $trg1
+    }
+  }
+  return $neighbors
+}
+#_______________________
+
+method OriginalCoords {x y} {
+  # Original coordinates of a piece.
+  #   x - X of piece center
+  #   y - Y of piece center
+
+  list [expr {int($x-$PCERADIUS)}] [expr {int($y-$PCERADIUS)}] \
+    [expr {int($x+$PCERADIUS)}] [expr {int($y+$PCERADIUS)}]
+}
+#_______________________
+
+method CurrentCoords {id} {
+  # Current coordinates of a piece.
+  #   id - piece's ID
+
+  lassign [$Wcan3 coords $id] x1 y1 x2 y2
+  list [expr {$x1-1}] [expr {$y1-1}]
+}
+#_______________________
+
+method End {} {
+  # Checks if the puzzle is solved: all source pieces are fixed in target.
+  # Returns 0 or id of found vacant source piece.
+
+  for {set i 0} {$i<$SRCNUMBER} {incr i} {
+    set src $D(Src,$i)
+    # $D(busy,$src)==-1 means "piece is fixed in target"
+    if {$D(busy,$src)==-1 && [incr succ]==$SRCNUMBER} {
+      bell
+      my Message {G R E A T!  YOU DID IT!}
+    } elseif {!$D(busy,$src)} {
+      return $src
+    }
+  }
+  return 0
+}
+
+## ________________________ On events actions _________________________ ##
 
 method OnButtonPress {key} {
   # Handles the mouse clicking a piece.
   #   key - key in D array for the piece
 
   lassign $D($key) id
-  if {$D(busy,$id)<0} {
+  if {$D(busy,$id)<0} {                  ;# fixed piece: place it to source
     my Message {The move was undone}
     my PlaceToSource $id
-    return
-  }
-  switch [incr D(click)] {
-    2 - 3 {
-      if {$D(dndXY) ne {}} {
-        my OnButtonRelease
-      } else {
-        my PlaceToSource $id
-      }
-      set D(click) 0
-      return
+  } elseif {[incr D(click)] in {2 3}} {  ;# one click: place it to target/source
+    if {$D(dndXY) ne {}} {
+      my OnButtonRelease
+    } else {
+      my PlaceToSource $id
     }
+    set D(click) 0
+  } else {                               ;# otherwise piece is moved
+    $Wcan3 raise $id
+    my ColorPiece $id $BGPENDING1 $BGPENDING2
+    set D(dndXY) [list [winfo pointerx $Win] [winfo pointery $Win] $id]
+    set D(dndtime) [clock milliseconds]
   }
-  $Wcan3 raise $id
-  my ColorPiece $id $BGPENDING1 $BGPENDING2
-  set D(dndXY) [list [winfo pointerx $Win] [winfo pointery $Win] $id]
-  set D(dndtime) [clock milliseconds]
 }
 #_______________________
 
@@ -358,7 +575,7 @@ method OnButtonMotion {} {
   $Wcan3 move $id $movX $movY
   set D(dndXY) [list $x0 $y0 $id]
   set D(click) 2
-  if {(abs($movX)+abs($movY))>10} {  ;# handling stops when cursor stops
+  if {(abs($movX)+abs($movY))>10} {  ;# this stops when cursor stops
     my OnButtonMotion
   }
 }
@@ -371,26 +588,37 @@ method OnButtonRelease {} {
   lassign $D(dndXY) x y id
   set D(dndXY) {}
   set D(click) 0
-  lassign [my ItemCenter $id] x1 y1
-  set min $WIDTH
+  lassign [my CurrentCoords $id] x1 y1
+  set mindist $WIDTH
   # get a target closest to the cursor
   foreach idov [$Wcan3 find overlapping {*}[$Wcan3 bbox $id]] {
     if {[string match *Trg* [$Wcan3 gettags $idov]]} {
-      lassign [my ItemCenter $idov] x2 y2
-      set cur [expr {sqrt(($x2-$x1)**2 + ($y2-$y1)**2)}]
-      if {$cur<$min} {
-        set min $cur
+      lassign [my CurrentCoords $idov] x2 y2
+      set curdist [expr {sqrt(($x2-$x1)**2 + ($y2-$y1)**2)}]
+      if {$curdist<$mindist} {
+        set mindist $curdist
         set idtrg $idov
       }
     }
   }
-  if {$min < $WIDTH} {
+  if {$mindist < $WIDTH} {
     my PlaceToTarget $id $idtrg
   } else {
     my PlaceToSource $id
   }
 }
+#_______________________
 
+method OnPressTarget {trg} {
+  # Places source piece on vacant target.
+  #   trg - id of target
+
+  if {!$D(busy,$trg) && [set src [my End]]} {
+    $Wcan3 raise $src
+    my ColorPiece $src $BGPENDING1 $BGPENDING2
+    my PlaceToTarget $src $trg
+  }
+}
 #_______________________
 
 method BindSource {id src} {
@@ -401,163 +629,6 @@ method BindSource {id src} {
   $Wcan3 bind $id <ButtonPress> "[self] OnButtonPress Src$src"
   $Wcan3 bind $id <ButtonRelease> "[self] OnButtonRelease"
   $Wcan3 bind $id <Motion> "[self] OnButtonMotion"
-}
-
-## ________________________ Managing _________________________ ##
-
-method Start {} {
-  # Initializes source & target.
-
-  # restore source pieces
-  for {set i 0} {$i<$SRCNUMBER} {incr i} {
-    set id $D(Src,$i)
-    my ColorPiece $id $BGPENDING $BGPENDING2
-    my PlaceToSource $id
-    set D(busy,$id) 0
-  }
-  # restore targets
-  for {set i 0} {$i<$TRGNUMBER} {incr i} {
-    lassign $D(Trg$i) id
-    set D(busy,$id) 0
-  }
-  set D(click) 0
-  set D(dndXY) {}
-}
-#_______________________
-
-method VacateTarget {src} {
-  # Vacates a target from a source piece.
-  #   src - id of source
-
-  my ColorPiece $src $BGPENDING $BGPENDING2
-  for {set i 0} {$i<$TRGNUMBER} {incr i} {
-    lassign $D(Trg$i) trg
-    if {$D(busy,$trg)==$src} {
-      set D(busy,$trg) 0
-      $Wcan3 bind $D(N$trg) <ButtonPress> {}
-    }
-  }
-}
-#_______________________
-
-method PlaceToSource {src} {
-  # Places piece to source.
-  #   src - id of source
-
-  lassign $D(Src$src) -> x y
-  $Wcan3 moveto $src $x $y
-  set D(busy,$src) 0
-  my VacateTarget $src
-}
-#_______________________
-
-method PlaceToTarget {src trg } {
-  # Places source piece to target.
-  #   src - id of source
-  #   trg - id of target
-
-  set color1 $BGPENDING
-  set color2 $BGPENDING2
-  set oldtrg $D(busy,$src)
-  if {$D(busy,$trg)} {
-    my Message {This target isn't vacant}
-    if {$oldtrg} {
-      my MoveToTarget $src $oldtrg $color1 $color2  ;# return to old target
-    } else {
-      my PlaceToSource $src  ;# return to source
-      return
-    }
-  }
-  my VacateTarget $src
-  if {!$oldtrg} {
-    set D(busy,$src) $trg  ;# "this target has to be fixed"
-    set neighbors [my Neighbors $trg]
-    if {![llength $neighbors]} {
-      my Message {No moves for this piece}  ;# 2nd step impossible
-      set D(busy,$src) -$trg
-      set color1 $BGBAD
-      set color2 $BGBAD2
-    }
-  } else {
-    set neighbors [my Neighbors $oldtrg]
-    if {$trg ni $neighbors} {
-      my Message {The move isn't correct} ;# neighbors not available
-      set trg $oldtrg
-    } else {
-      set D(busy,$src) -$trg  ;# "this piece is fixed"
-      set color1 $BGSUCCESS
-      set color2 $BGSUCCESS2
-      my End
-    }
-  }
-  my MoveToTarget $src $trg $color1 $color2
-}
-#_______________________
-
-method MoveToTarget {src trg color1 color2} {
-  # Moves source piece to target.
-  #   src - id of source
-  #   trg - id of target
-  #   color1 - fill color
-  #   color2 - outline color
-
-  lassign [my ItemCenter $trg] x y
-  $Wcan3 moveto $src $x $y
-  set D(busy,$trg) $src
-  my ColorPiece $src $color1 $color2
-  $Wcan3 raise $D(N$trg)
-  my BindSource $D(N$trg) $src
-}
-#_______________________
-
-method ColorPiece {id color1 color2} {
-  # Colors source piece and its possible target lines.
-  #   id - ID of source piece
-  #   color1 - fill color
-  #   color2 - outline color
-
-  $Wcan3 itemconfigure $id -fill $color1 -outline $color2
-}
-#_______________________
-
-method Neighbors {trg} {
-  # Get available neighbors for a target (2, 1 or 0).
-  #   trg - id of target
-
-  set neighbors [list]
-  foreach neib $D(Neighbors) {
-    lassign $neib trg1 trg2
-    if {$trg1==$trg && !$D(busy,$trg2)} {
-      lappend neighbors $trg2
-    } elseif {$trg2==$trg && !$D(busy,$trg1)} {
-      lappend neighbors $trg1
-    }
-  }
-  return $neighbors
-}
-#_______________________
-
-method ItemCenter {id} {
-  # Gets an item's center.
-  #   id - item's ID
-  # Returns list {x y} of the center.
-
-  lassign [$Wcan3 coords $id] x1 y1 x2 y2
-  return [list [expr {$x1-1}] [expr {$y1-1}]]
-}
-#_______________________
-
-method End {} {
-  # Checks if the puzzle is solved: all source pieces are fixed in target.
-
-  for {set i 0} {$i<$SRCNUMBER} {incr i} {
-    set src $D(Src,$i)
-    # $D(busy,$src)<0 means "piece is fixed in target"
-    if {$D(busy,$src)<0 && [incr succ]==$SRCNUMBER} {
-      bell
-      my Message {G R E A T!  YOU DID IT!}
-    }
-  }
 }
 
 ## ________________________ Messages _________________________ ##
@@ -571,6 +642,7 @@ method Message {msg {wait 0} {doit no}} {
   catch {  ;# the method can be called after destroying Puzzle object => catch
     set D(msg) {}
     catch {$Wcan4 delete $D(idmsg)}
+    catch {after cancel $D(idafter)}
     if {!$doit} {
       after idle [list [self] Message $msg $wait yes]
       return
@@ -579,7 +651,6 @@ method Message {msg {wait 0} {doit no}} {
     set D(idmsg) [$Wcan4 create text [expr {$WIDTH/2}] 16 -text $msg \
       -fill $BGMSG -font $FONTSMALL]
     if {$wait} {
-      catch {after cancel $D(idafter)}
       set D(idafter) [after [expr {$wait*200}] "catch {[self] CheckMessage}"]
     }
   }
@@ -620,6 +691,7 @@ To move a source piece, you
 can drag-and-drop it. Or
 just click it, then move to
 a target and click again.
+Or click a vacant target.
 
 The puzzle can be run so:
   wish samloyd279.tcl NP
@@ -630,7 +702,7 @@ from 8 to 24, by default 12.
 https://github.com/aplsimple}
 }
 
-# ________________________ EOC _________________________ #
+  # ________________________ EOC _________________________ #
 
 }
 
@@ -638,8 +710,8 @@ https://github.com/aplsimple}
 
 set samloyd279::solo [expr {[info exist ::argv0] && \
   [file normalize $::argv0] eq [file normalize [info script]]}]
-if {$samloyd279::solo} {
-  # run as stand-alone app
+
+if {$samloyd279::solo} {  ;# run as stand-alone app
   wm withdraw .
   set cnum [lindex $::argv 0]
   set dnum [set [namespace current]::samloyd279::defaultPieceNumber]
