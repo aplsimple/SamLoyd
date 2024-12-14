@@ -270,7 +270,8 @@ method BuildTarget {} {
     set x2 [expr {$cX+($x2-$cX)*$cRC-1}]
     set y1 [expr {$cY+($y1-$cY)*$cRC-1}]
     set y2 [expr {$cY+($y2-$cY)*$cRC-1}]
-    set id [$Wcan3 create polygon $x1 $y1 $x2 $y2 -outline $BGWAIT]
+    set id [$Wcan3 create polygon $x1 $y1 $x2 $y2 -width 2 \
+      -fill $BGWAIT -outline $BGWAIT]
     set D(Trg$ic1,id1) $id
     set D(Trg$ic2,id2) $id
     lassign $D(Trg$ic1) id1
@@ -471,8 +472,8 @@ method ColorNeighborLines {} {
           continue
         }
       }
-      $Wcan3 itemconfigure $D(Trg$i,id1) -outline $linecolor
-      $Wcan3 itemconfigure $D(Trg$i,id2) -outline $linecolor
+      $Wcan3 itemconfigure $D(Trg$i,id1) -fill $linecolor -outline $linecolor
+      $Wcan3 itemconfigure $D(Trg$i,id2) -fill $linecolor -outline $linecolor
     }
   }
 }
