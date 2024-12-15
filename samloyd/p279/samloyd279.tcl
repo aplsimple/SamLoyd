@@ -152,14 +152,14 @@ constructor {wpar solo cnum} {
   set WIDTH [expr {$WIDTH1 + $WIDTH2 + $MARGIN*3}]
   #colors
   set BGCANVAS black      ;# canvas background
-  set BGSUCCESS  #218121  ;# successful piece
-  set BGSUCCESS2 #004000  ;# border of successful piece
+  set BGSUCCESS  #379737  ;# successful piece
+  set BGSUCCESS2 #155515  ;# border of successful piece
   set BGBAD      #ff4243  ;# bad piece
   set BGBAD2     #400000  ;# border of bad piece
-  set BGPENDING  #d9d900  ;# pending piece
-  set BGPENDING1 #ff9d00  ;# border of pending piece
+  set BGPENDING  #caca00  ;# pending piece
+  set BGPENDING1 #e48200  ;# border of moved piece
   set BGPENDING2 #4e4e0e  ;# border of pending piece
-  set BGWAIT     #808080  ;# piece waiting
+  set BGWAIT     #888888  ;# piece waiting
   set BGWAIT2    #464646  ;# border of pieces waiting
   set BGMSG      #ff6bff  ;# message
   # build & run the puzzle
@@ -213,7 +213,8 @@ method BuildSource {} {
   set Y1 [expr {$MARGIN*0.4}]
   set X2 $WIDTH1
   set Y2 [expr {$HEIGHT-$Y1}]
-  set id [$Wcan3 create polygon $X1 $Y1 $X2 $Y1 $X2 $Y2 $X1 $Y2 -outline $BGWAIT]
+  set id [$Wcan3 create polygon $X1 $Y1 $X2 $Y1 $X2 $Y2 $X1 $Y2 \
+    -outline $BGWAIT -width 3]
   set multy [expr {$PCERADIUS*2.6}]
   set shiftX [expr {$X1 + $PCERADIUS*1.6}]
   set shiftY [expr {$Y1 + $PCERADIUS*1.6}]
@@ -270,7 +271,7 @@ method BuildTarget {} {
     set x2 [expr {$cX+($x2-$cX)*$cRC-1}]
     set y1 [expr {$cY+($y1-$cY)*$cRC-1}]
     set y2 [expr {$cY+($y2-$cY)*$cRC-1}]
-    set id [$Wcan3 create polygon $x1 $y1 $x2 $y2 -width 2 \
+    set id [$Wcan3 create polygon $x1 $y1 $x2 $y2 -width 3 \
       -fill $BGWAIT -outline $BGWAIT]
     set D(Trg$ic1,id1) $id
     set D(Trg$ic2,id2) $id
