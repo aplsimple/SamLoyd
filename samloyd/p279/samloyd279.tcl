@@ -13,15 +13,16 @@ namespace eval samloyd279 {
 
   variable defaultPieceNumber 12
 
-  proc run {{w .} {cnum ""} {solo no}} {
+  proc run {{w .} {cnum ""} {onepend 1} {solo no}} {
     # Runs the puzzle.
     #   w - parent window
     #   cnum - number of pieces
+    #   onepend - only 1 pending piece allowed
     #   solo - true, if runs as stand-alone app
 
     variable defaultPieceNumber
     if {$cnum eq {}} {set cnum $defaultPieceNumber}
-    [Puzzle new $w $solo $cnum] destroy
+    [Puzzle new $w $cnum $onepend $solo] destroy
     if {$solo} exit
   }
 
@@ -110,30 +111,33 @@ oo::class create samloyd279::Puzzle {
   variable TTLHEIGHT TOOLHEIGHT MSGHEIGHT MARGIN HEIGHT WIDTH WIDTH1 WIDTH2
   variable BGSUCCESS BGPENDING BGPENDING1 BGBAD BGCANVAS BGWAIT BGMSG
   variable BGSUCCESS2 BGPENDING2 BGBAD2 BGWAIT2
-  variable Win Solo Wcan1 Wcan2 Wcan3 Wcan4 D
+  variable Win Solo OnePend Wcan1 Wcan2 Wcan3 Wcan4 D
 
-constructor {wpar solo cnum} {
+constructor {wpar cnum onepend solo} {
   # Constructs and runs the puzzle.
   #   wpar - path to parent window
-  #   solo - true, if runs as stand-alone app
   #   cnum - number of pieces
+  #   onepend - only 1 pending piece allowed
+  #   solo - true, if runs as stand-alone app
 
   my variable WIDTH   ;# width of puzzle
   my variable HEIGHT  ;# height of puzzle (without accessories)
   my variable WIDTH1  ;# width of source
   my variable WIDTH2  ;# width/height of target
-  my variable Win   ;# puzzle window
-  my variable Solo  ;# if run stand-alone
-  my variable D     ;# data of pieces
+  my variable Win     ;# puzzle window
+  my variable Solo    ;# if run stand-alone
+  my variable OnePend ;# 1 pending piece allowed
+  my variable D       ;# data of pieces
 
   # methods available only during the puzzle
   oo::objdefine [self] {
-    export Message ShowHelp CheckMessage Start \
+    export Message ShowHelp CheckMessage Start CheckOnePend \
       OnButtonPress OnButtonMotion OnButtonRelease OnPressTarget
   }
   # common data
   set npzl 279
   set Solo $solo
+  set OnePend $onepend
   set TITLE "Sam Loyd's puzzle #$npzl"
   set FONTLARGE {Helvetica 26 bold}    ;# title font
   set FONTSMALL {Helvetica 14 bold}    ;# message font
@@ -291,23 +295,28 @@ method BuildAccessories {} {
   set pad 8
   grid [button $Wcan2.but1 -image samloyd279::runImage -bg $BGCANVAS \
     -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
-    -command "[self] Start"] -padx $MARGIN -sticky nsw
-  grid [label $Wcan2.space -text { } -bg $BGCANVAS] -row 0 -column 1 -sticky ew
+    -highlightcolor $BGMSG -command "[self] Start"] -padx $MARGIN -sticky nsw
+  grid [checkbutton $Wcan2.but2 -text {One pending only} -fg $BGWAIT -bg $BGCANVAS \
+    -variable [namespace current]::OnePend -activebackground $BGWAIT2 \
+    -activeforeground white -highlightcolor $BGMSG \
+    -command "[self] CheckOnePend"] -row 0 -column 1 -sticky w
+  grid [label $Wcan2.space -text { } -bg $BGCANVAS] -row 0 -column 2 -sticky ew
   grid columnconfigure $Wcan2 1 -weight 9
-  grid [button $Wcan2.but2 -image samloyd279::helpImage -bg $BGCANVAS \
-    -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
-    -command "[self] ShowHelp"] -row 0 -column 2 -padx $pad
-  grid [button $Wcan2.but3 -image samloyd279::exitImage -bg $BGCANVAS \
-    -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
-    -command "destroy $Win"] -row 0 -column 3
+  grid [button $Wcan2.but3 -image samloyd279::helpImage -bg $BGCANVAS \
+    -activebackground $BGWAIT2 -highlightbackground $BGCANVAS -highlightcolor $BGMSG \
+    -command "[self] ShowHelp"] -row 0 -column 3 -padx $pad
+  grid [button $Wcan2.but4 -image samloyd279::exitImage -bg $BGCANVAS \
+    -activebackground $BGWAIT2 -highlightbackground $BGCANVAS -highlightcolor $BGMSG \
+    -command "destroy $Win"] -row 0 -column 4
   grid [label $Wcan2.space2 -text { } -bg $BGCANVAS] \
-    -row 0 -column 4 -padx [expr {$MARGIN/2 - 4}]
+    -row 0 -column 5 -padx [expr {$MARGIN/2 - 4}]
   grid [ttk::separator $Wcan2.separ -orient horizontal] \
     -row 1 -padx $MARGIN -pady [expr {$pad/2}] -columnspan 99 -sticky ew
-  bind $Wcan2.but1 <Enter> "[self] Message {Starts puzzling} 8"
-  bind $Wcan2.but2 <Enter> "[self] Message {Helps with puzzling} 8"
-  bind $Wcan2.but3 <Enter> "[self] Message {Ends puzzling} 8"
-  foreach i {1 2 3} {
+  bind $Wcan2.but1 <Enter> "[self] Message {Starts puzzling} 9"
+  bind $Wcan2.but2 <Enter> "[self] Message {Allows only one pending target} 16"
+  bind $Wcan2.but3 <Enter> "[self] Message {Helps with puzzling} 10"
+  bind $Wcan2.but4 <Enter> "[self] Message {Ends puzzling} 8"
+  foreach i {1 2 3 4} {
     bind $Wcan2.but$i <Leave> "[self] Message {}"
   }
 }
@@ -424,6 +433,23 @@ method MoveToTarget {src trg color1 color2} {
   my ColorPiece $src $color1 $color2
   $Wcan3 raise $D(N$trg)
   my BindSource $D(N$trg) $src
+  # is only 1 pending piece allowed?
+  if {$OnePend} {
+    for {set i 0} {$i<$SRCNUMBER} {incr i} {
+      set s $D(Src,$i)
+      if {$D(busy,$s) ni {0 -1}} {
+        if {$s!=$src} {set s0 $s}
+        if {[incr pending]>1} {
+          my Message {Only one pending target is allowed. Try the blinking target.}
+          my PlaceToSource $src
+          set fill [$Wcan3 itemcget $s0 -fill]
+          $Wcan3 itemconfigure $s0 -fill $BGCANVAS
+          after 500 "$Wcan3 itemconfigure $s0 -fill $fill"
+          break
+        }
+      }
+    }
+  }
 }
 #_______________________
 
@@ -453,7 +479,7 @@ method ColorNeighborLines {} {
           if {[llength $neighbors]} {  ;# good cell?
             set linecolor $color
           } else {
-            set linecolor $BGBAD       ;# no, it become bad
+            set linecolor $BGBAD       ;# no, it became bad
             my VacateTarget $src
             my PlaceToTarget $src $trg
           }
@@ -463,7 +489,7 @@ method ColorNeighborLines {} {
       } elseif {$color eq $BGBAD} {
         if {$flag<-1} {                ;# bad cell?
           if {[llength $neighbors]} {
-            set linecolor $BGPENDING   ;# no, it become good
+            set linecolor $BGPENDING   ;# no, it became good
             my VacateTarget $src
             my PlaceToTarget $src $trg
           } else {
@@ -513,6 +539,25 @@ method CurrentCoords {id} {
 
   lassign [$Wcan3 coords $id] x1 y1 x2 y2
   list [expr {$x1-1}] [expr {$y1-1}]
+}
+#_______________________
+
+method CheckOnePend {} {
+  # At changing "one pending only" mode.
+
+  set title [$Wcan2.but2 cget -text]
+  set ans [tk_messageBox -title $title -parent $Win \
+    -type okcancel -message \
+"$title = ON\
+\nmakes the task harder.\
+\n\
+\nChanging the mode\
+\nrestarts the puzzle."]
+  if {$ans eq {ok}} {
+    my Start
+  } else {
+    set OnePend [expr {!$OnePend}]
+  }
 }
 #_______________________
 
@@ -716,14 +761,14 @@ set samloyd279::solo [expr {[info exist ::argv0] && \
 if {$samloyd279::solo} {  ;# run as stand-alone app
   wm withdraw .
   set cnum [lindex $::argv 0]
-  set dnum [set [namespace current]::samloyd279::defaultPieceNumber]
+  set dnum [set samloyd279::defaultPieceNumber]
   if {$cnum eq {}} {set cnum $dnum}
   if {$::argc>1 || ![string is digit -strict $cnum] || $cnum<8 || $cnum>24} {
     puts "\nRun the puzzle this way:\n  wish [info script] ?PN? \
     \nwhere PN - number of pieces (8..24), by default $dnum\n"
     exit
   }
-  samloyd279::run . $cnum yes
+  samloyd279::run . $cnum 1 yes
 }
 
 # ________________________ EOF _________________________ #
