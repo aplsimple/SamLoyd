@@ -12,12 +12,12 @@ Just press F1 key or click "Help" button.
 
 Puzzles are run with Tcl/Tk interpreters (*wish* or *tclsh*):
 
-    wish samloydNN.tcl ?args?
-    tclsh samloydNN.tcl ?args?
+    wish puzzle.tcl ?args?
+    tclsh puzzle.tcl ?args?
 
 where
 
-  - NN - index of puzzle
+  - puzzle - name of puzzle
   - args - optional arguments
 
 # Where to get Tcl/Tk

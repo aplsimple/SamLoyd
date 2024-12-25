@@ -569,7 +569,6 @@ method End {} {
     set src $D(Src,$i)
     # $D(busy,$src)==-1 means "piece is fixed in target"
     if {$D(busy,$src)==-1 && [incr succ]==$SRCNUMBER} {
-      bell
       my Message {G R E A T!  YOU DID IT!}
     } elseif {!$D(busy,$src)} {
       return $src
