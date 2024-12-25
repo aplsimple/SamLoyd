@@ -8,7 +8,7 @@ The pieces are included in two glued cycles: left and right. Both are rotated cl
 
 To rotate a cycle, click and drag its piece and drop it on one of its neighbors.
 
-To start a new puzzle, click one of patterns or enter it in *Level* entry.
+To start a new puzzle, click one of patterns. Or enter new *Difficulty* which relates to the shuffling.
 
 To restart the current puzzle, click the button *Restart*.
 
@@ -20,9 +20,11 @@ Other buttons allow:
 
 The puzzle can be run so:
 
-    tclsh gluedcycles.tcl ?LEVEL?
+    tclsh gluedcycles.tcl ?LEVEL? ?DIFFICULTY?
 
-where LEVEL - puzzle level from 1 to 8, by default 3.
+where:
+  LEVEL - puzzle level (pattern), from 1 to 8, by default 3
+  DIFFICULTY - difficulty, from 1 to 8, by default 3
 
 
 # Links

@@ -12,21 +12,26 @@ package require Tk
 namespace eval gluedcycles {
 
   variable defaultLevel 3
+  variable defaultDifficulty 3
 
-  proc run {{w .} {lev ""} {solo no}} {
+  proc run {{w .} {level ""} {difficulty ""} {solo no}} {
     # Runs the puzzle.
     #   w - parent window
-    #   lev - puzzle level
+    #   level - puzzle level
+    #   difficulty - puzzle difficulty
     #   solo - true, if runs as stand-alone app
-    # Returns the last used level of puzzle.
+    # Returns level and difficulty last used.
 
     variable defaultLevel
-    if {$lev eq {}} {set lev $defaultLevel}
-    set puzzle [Puzzle new $w $lev $solo]
-    set lastlev [$puzzle level]
+    variable defaultDifficulty
+    if {$level eq {}} {set level $defaultLevel}
+    if {$difficulty eq {}} {set difficulty $defaultDifficulty}
+    set puzzle [Puzzle new $w $level $difficulty $solo]
+    set level [$puzzle level]
+    set difficulty [$puzzle difficulty]
     $puzzle destroy
-    if {$solo} {exit $lastlev}
-    return $lastlev
+    if {$solo} {exit [expr {10*$level+$difficulty}]}
+    return [list $level $difficulty]
   }
 
   image create photo gluedcycles::runImage -data {iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAC+lBMVEUAAACBAABsAABiAwNkAAB/
@@ -174,25 +179,28 @@ tc3Ny87Os/P1MPFYL6CPliil2d+nPF2YZm1t7W5i7cmhB9OPAKwi3Kutlrq5LVu5llNICWvOUJYT
 
 oo::class create gluedcycles::Puzzle {
 
-  variable TITLE PCERADIUS PI FONTLARGE FONTSMALL
+  variable TITLE PCERADIUS FONTLARGE FONTSMALL
   variable TTLHEIGHT TOOLHEIGHT MSGHEIGHT MARGIN HEIGHT WIDTH
   variable BGSUCCESS BGPENDING BGPENDING1 BGCANVAS BGWAIT BGMSG BGMSG2
   variable BGSUCCESS2 BGPENDING2 BGWAIT2 FGCIRCLE1 FGCIRCLE2
-  variable Win Solo Level OldLevel Wcan1 Wcan2 Wcan3 Wcan4 D Circles Pieces Eps
+  variable Win Level Difficulty OldDifficulty Solo
+  variable Wcan1 Wcan2 Wcan3 Wcan4 D Circles Pieces Eps
 
-constructor {wpar lev solo} {
+constructor {wpar level difficulty solo} {
   # Constructs and runs the puzzle.
   #   wpar - path to parent window
-  #   lev - number of pieces
+  #   level - puzzle level
+  #   difficulty - puzzle difficulty
   #   solo - true, if runs as stand-alone app
 
   my variable WIDTH    ;# width of puzzle
   my variable HEIGHT   ;# height of puzzle (without accessories)
   my variable Win      ;# puzzle window
   my variable Solo     ;# if run stand-alone
-  my variable Level    ;# level current
-  my variable OldLevel ;# level previous
+  my variable Level    ;# level
   my variable D        ;# data of pieces
+  my variable Difficulty    ;# level difficulty
+  my variable OldDifficulty ;# old difficulty
 
   my variable Circles  ;# data of circle pairs
 
@@ -202,7 +210,7 @@ constructor {wpar lev solo} {
 
   # methods available only during the puzzle
   oo::objdefine [self] {
-    export Message ShowHelp CheckMessage Start CheckLevel ShufflePieces SOS \
+    export Message ShowHelp CheckMessage Start CheckDifficulty ShufflePieces SOS \
       HideArrows State OnButtonPress OnButtonMotion OnButtonRelease
   }
 
@@ -264,12 +272,12 @@ constructor {wpar lev solo} {
   # common data
   array set D [list]
   set Solo $solo
-  set Level [set OldLevel $lev]
+  set Level $level
+  set Difficulty [set OldDifficulty $difficulty]
   set Eps 8
   set TITLE {Glued cycles}
   set FONTLARGE {Helvetica 26 bold}  ;# title font
   set FONTSMALL {Helvetica 14 bold}  ;# message font
-  set PI 3.1415926536
   # sizes
   set PCERADIUS 50   ;# radius of piece
   set TTLHEIGHT 60   ;# height of title
@@ -313,12 +321,21 @@ constructor {wpar lev solo} {
 }
 #_______________________
 
-method level {{lev ""}} {
+method level {{level ""}} {
   # Gets/sets the puzzle level.
-  #   lev - puzzle level
+  #   level - puzzle level
 
-  if {$lev ne ""} {set Level $lev}
+  if {$level ne ""} {set Level $level}
   return $Level
+}
+#_______________________
+
+method difficulty {{difficulty ""}} {
+  # Gets/sets the puzzle difficulty.
+  #   difficulty - puzzle difficulty
+
+  if {$difficulty ne ""} {set Difficulty $difficulty}
+  return $Difficulty
 }
 
 ## ________________________ Build GUI _________________________ ##
@@ -387,11 +404,12 @@ method BuildAccessories {} {
   grid [button $Wcan2.butRun -image gluedcycles::runImage -bg $BGCANVAS \
     -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
     -highlightcolor $BGMSG -command "[self] Start {} false"] -padx $MARGIN
-  grid [label $Wcan2.lab -text Level -fg $BGWAIT -bg $BGCANVAS] -row 0 -column 1
+  grid [label $Wcan2.lab -text Difficulty -fg $BGWAIT -bg $BGCANVAS] -row 0 -column 1
   grid [entry $Wcan2.butEnt -fg $BGWAIT -bg $BGCANVAS -width 3 \
     -highlightcolor $BGMSG -insertbackground white -textvariable \
-    [namespace current]::Level -justify center -validate key \
-    -validatecommand "[self] CheckLevel %d %P %S"] -row 0 -column 2 -sticky w -padx 8
+    [namespace current]::Difficulty -justify center -validate key \
+    -validatecommand "[self] CheckDifficulty %d %S"] \
+    -row 0 -column 2 -sticky w -padx 8
   grid [label $Wcan2.space -text { } -bg $BGCANVAS] -row 0 -column 3 -sticky ew
   grid columnconfigure $Wcan2 3 -weight 9
   grid [button $Wcan2.butUp -image gluedcycles::upload -bg $BGCANVAS \
@@ -637,7 +655,7 @@ method ShufflePieces {{doshuffle yes} {pattern ""}} {
       set D(idxpce) $D(wanted)
       set D(SOS) [list [list $D(wanted) 0]]
       lassign [my TwoCircles $D(puzzle)] X1 Y1 R1 X2 Y2 R2 pieces circle1 circle2
-      for {set i 0} {$i<=($Level+1)} {incr i} {
+      for {set i 0} {$i<$Difficulty*2} {incr i} {
         set shl [expr {int(floor(rand()*$numpce/2))}]
         for {set si 0} {$si<=$shl} {incr si} {
           set pce [expr {int(floor(rand()*$numpce))}]
@@ -739,15 +757,15 @@ method Neighbors {ipce circle} {
   #   circle - numbers of circle
 
   if {[set i [lsearch $circle $ipce]]<0} {
-    set ret [list]
+    set res [list]
   } elseif {$i==0} {
-    set ret [list [lindex $circle end] [lindex $circle $i+1]]
+    set res [list [lindex $circle end] [lindex $circle $i+1]]
   } elseif {$i==([llength $circle]-1)} {
-    set ret [list [lindex $circle $i-1] [lindex $circle 0]]
+    set res [list [lindex $circle $i-1] [lindex $circle 0]]
   } else {
-    set ret [list [lindex $circle $i-1] [lindex $circle $i+1]]
+    set res [list [lindex $circle $i-1] [lindex $circle $i+1]]
   }
-  return $ret
+  return $res
 }
 #_______________________
 
@@ -831,18 +849,18 @@ method ColorPieces {} {
   # Returns yes, if all pieces are solved (green).
 
   set numpce [llength [lindex $Circles($D(puzzle)) 6]]
-  set ret yes
+  set res yes
   for {set ipce 1} {$ipce<=$numpce} {incr ipce} {
     if {[lindex $D(idxpce) $ipce-1] == $ipce} {
       set outline $BGSUCCESS
     } else {
-      set ret no
+      set res no
       set outline [$Wcan3 itemcget $D(ID,puzzle,pce$ipce) -outline]
     }
     $Wcan3 itemconfigure $D(ID,puzzle,txt$ipce) -fill $outline
     $Wcan3 raise $D(ID,puzzle,txt$ipce)
   }
-  return $ret
+  return $res
 }
 #_______________________
 
@@ -857,28 +875,27 @@ method ColorMenuPuzzle {NP color} {
 }
 #_______________________
 
-method CheckLevel {d P S} {
-  # At changing the puzzle level.
+method CheckDifficulty {d S} {
+  # At changing the puzzle difficulty.
   #  d - action (%d of validate)
-  #  P - current value of entry (%P of validate)
   #  S - pressed char (%S of validate)
 
-  if {$d!=1 || $S<1 || $S>8 || ![string is digit $S]} {
+  if {$d!=1 || $S<1 || $S>9 || ![string is digit $S]} {
     if {$d==1} {
       bell
-      after idle "[self] level $OldLevel"
+      after idle "[self] difficulty $OldDifficulty"
     }
     return 1
   }
-  set OldLevel $S
-  after idle "[self] level $OldLevel; [self] Start P$S"
+  set OldDifficulty $S
+  after idle "[self] difficulty $OldDifficulty; [self] Start"
   return 1
 }
 #_______________________
 
 method State {mode} {
   # Saves/restores the current state.
-  #   mode - "r" (save), "w" (restore) or "check"
+  #   mode - "w" (save), "r" (restore) or "check"
 
   set fname [file normalize [info script]]
   set fname [string range $fname 0 end-4].rc
@@ -890,12 +907,22 @@ method State {mode} {
     $Wcan2.butDown configure -state normal
   }
   switch $mode {
+    w {
+      foreach k {puzzle idxpce orig,idxpce idxpce-new wanted clockwise SOS Move} {
+        puts $ch $k\t$D($k)
+      }
+      puts $ch Level\t$Level
+      puts $ch Difficulty\t$Difficulty
+      puts $ch OldDifficulty\t$OldDifficulty
+      $Wcan2.butDown configure -state normal
+      my Message "The puzzle saved"
+    }
     r {
       foreach rc [split [read $ch] \n] {
         if {$rc ne {}} {
           lassign [split $rc \t] k val
           switch -- $k {
-            Level - OldLevel {set $k $val}
+            Level - Difficulty - OldDifficulty {set $k $val}
             puzzle {
               set D($k) $val
               my Start $val
@@ -909,15 +936,6 @@ method State {mode} {
       my ShowMove
       my End
       my Message "The puzzle restored"
-    }
-    w {
-      foreach k {puzzle idxpce orig,idxpce idxpce-new wanted clockwise SOS Move} {
-        puts $ch $k\t$D($k)
-      }
-      puts $ch Level\t$Level
-      puts $ch OldLevel\t$OldLevel
-      $Wcan2.butDown configure -state normal
-      my Message "The puzzle saved"
     }
   }
   catch {close $ch}
@@ -1127,9 +1145,10 @@ restart the current puzzle,
 click the button "Restart".
 
 The puzzle can be run so:
-  wish gluedcycles.tcl LEVEL
-where LEVEL - puzzle level
-from 1 to 8, by default 3.
+  wish gluedcycles.tcl L D
+where:
+L - level (1..8, default 3)
+D - difficulty (1..9, default 3)
         ____________________
 
 https://github.com/aplsimple}
@@ -1146,15 +1165,20 @@ set gluedcycles::solo [expr {[info exist ::argv0] && \
 
 if {$gluedcycles::solo} {  ;# run as stand-alone app
   wm withdraw .
-  set lev [lindex $::argv 0]
+  lassign $::argv level difficulty
   set dlev [set gluedcycles::defaultLevel]
-  if {$lev eq {}} {set lev $dlev}
-  if {$::argc>1 || ![string is digit -strict $lev] || $lev<1 || $lev>8} {
-    puts "\nRun the puzzle this way:\n  wish [info script] ?LEVEL? \
-    \nwhere LEVEL - puzzle level (1..8), by default $dlev\n"
+  if {$level eq {}} {set level $dlev}
+  set ddif [set gluedcycles::defaultDifficulty]
+  if {$difficulty eq {}} {set difficulty $ddif}
+  if {$::argc>2 || ![string is digit -strict $level] || $level<1 || $level>8 ||
+  ![string is digit -strict $difficulty] || $difficulty<1 || $difficulty>9} {
+    puts "\nRun the puzzle this way:\n  wish [info script] ?level? ?difficulty? \
+    \nwhere level - puzzle level (1..8), by default $dlev\
+    \n      difficulty - puzzle difficulty (1..9), by default $ddif\n
+    "
     exit
   }
-  gluedcycles::run . $lev yes
+  gluedcycles::run . $level $difficulty yes
 }
 
 # ________________________ EOF _________________________ #
