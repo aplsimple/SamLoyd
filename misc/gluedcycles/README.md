@@ -24,7 +24,7 @@ The puzzle can be run so:
 
 where:
   LEVEL - puzzle level (pattern), from 1 to 8, by default 3
-  DIFFICULTY - difficulty, from 1 to 8, by default 3
+  DIFFICULTY - difficulty, from 1 to 9, by default 3
 
 
 # Links

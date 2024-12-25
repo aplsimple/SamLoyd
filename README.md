@@ -1,6 +1,6 @@
 # What's that
 
-This repository contains few puzzles from Sam Loyd's book "Mathematical Puzzles".
+This repository contains puzzles from Sam Loyd's book "Mathematical Puzzles" and similar stuff.
 
 # Rules
 
@@ -43,3 +43,11 @@ and two corresponding screenshots:
 <img src="https://github.com/aplsimple/SamLoyd/releases/download/SamLoyd-0.0.1/samloyd279no.png" class="media" alt="">
 
 <img src="https://github.com/aplsimple/SamLoyd/releases/download/SamLoyd-0.0.1/samloyd279ok.png" class="media" alt="">
+
+Puzzle "Glued cycles" when solving:
+
+<img src="https://github.com/aplsimple/SamLoyd/releases/download/SamLoyd-0.0.1/gluedcycles1.png" class="media" alt="">
+
+Puzzle "Glued cycles" when solved:
+
+<img src="https://github.com/aplsimple/SamLoyd/releases/download/SamLoyd-0.0.1/gluedcycles2.png" class="media" alt="">
