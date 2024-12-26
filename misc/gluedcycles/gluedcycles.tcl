@@ -11,27 +11,18 @@ package require Tk
 
 namespace eval gluedcycles {
 
-  variable defaultLevel 3
-  variable defaultDifficulty 3
-
-  proc run {{w .} {level ""} {difficulty ""} {solo no}} {
+  proc run {{w .} {rcfile ""} {solo no}} {
     # Runs the puzzle.
     #   w - parent window
-    #   level - puzzle level
-    #   difficulty - puzzle difficulty
+    #   rcfile - .rc file
     #   solo - true, if runs as stand-alone app
-    # Returns level and difficulty last used.
 
-    variable defaultLevel
-    variable defaultDifficulty
-    if {$level eq {}} {set level $defaultLevel}
-    if {$difficulty eq {}} {set difficulty $defaultDifficulty}
-    set puzzle [Puzzle new $w $level $difficulty $solo]
-    set level [$puzzle level]
-    set difficulty [$puzzle difficulty]
-    $puzzle destroy
-    if {$solo} {exit [expr {10*$level+$difficulty}]}
-    return [list $level $difficulty]
+    if {[string is digit $rcfile]} { ;# obsolete call
+      set rcfile [file normalize [info script]]
+      set rcfile [string range $rcfile 0 end-4].rc
+    }
+    [Puzzle new $w $rcfile $solo] destroy
+    if {$solo} exit
   }
 
   image create photo gluedcycles::runImage -data {iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAC+lBMVEUAAACBAABsAABiAwNkAAB/
@@ -181,16 +172,15 @@ oo::class create gluedcycles::Puzzle {
 
   variable TITLE PCERADIUS FONTLARGE FONTSMALL
   variable TTLHEIGHT TOOLHEIGHT MSGHEIGHT MARGIN HEIGHT WIDTH
-  variable BGSUCCESS BGPENDING BGPENDING1 BGCANVAS BGWAIT BGMSG BGMSG2
-  variable BGSUCCESS2 BGPENDING2 BGWAIT2 FGCIRCLE1 FGCIRCLE2
-  variable Win Level Difficulty OldDifficulty Solo
-  variable Wcan1 Wcan2 Wcan3 Wcan4 D Circles Pieces Eps
+  variable BGSUCCESS BGPENDING BGCANVAS BGWAIT BGMSG BGMSG2
+  variable BGPENDING2 BGWAIT2 FGCIRCLE1 FGCIRCLE2
+  variable Win Level Difficulty OldDifficulty Rcfile Solo
+  variable Wcan1 Wcan2 Wcan3 Wcan4 D Circles Pieces Eps SavedState
 
-constructor {wpar level difficulty solo} {
+constructor {wpar rcfile solo} {
   # Constructs and runs the puzzle.
   #   wpar - path to parent window
-  #   level - puzzle level
-  #   difficulty - puzzle difficulty
+  #   rcfile - .rc file
   #   solo - true, if runs as stand-alone app
 
   my variable WIDTH    ;# width of puzzle
@@ -199,8 +189,10 @@ constructor {wpar level difficulty solo} {
   my variable Solo     ;# if run stand-alone
   my variable Level    ;# level
   my variable D        ;# data of pieces
+  my variable SavedState    ;# data keys of saved state
   my variable Difficulty    ;# level difficulty
   my variable OldDifficulty ;# old difficulty
+  my variable Rcfile   ;# .rc file
 
   my variable Circles  ;# data of circle pairs
 
@@ -272,9 +264,10 @@ constructor {wpar level difficulty solo} {
   # common data
   array set D [list]
   set Solo $solo
-  set Level $level
-  set Difficulty [set OldDifficulty $difficulty]
+  set Level [set Difficulty [set OldDifficulty 3]]
+  set Rcfile $rcfile
   set Eps 8
+  set SavedState {puzzle idxpce orig,idxpce wanted SOS Move}
   set TITLE {Glued cycles}
   set FONTLARGE {Helvetica 26 bold}  ;# title font
   set FONTSMALL {Helvetica 14 bold}  ;# message font
@@ -283,15 +276,13 @@ constructor {wpar level difficulty solo} {
   set TTLHEIGHT 60   ;# height of title
   set TOOLHEIGHT 60  ;# height of tool bar
   set MSGHEIGHT 30   ;# height of message bar
-  set MARGIN 40      ;# margin of source/target
+  set MARGIN 40      ;# margin of puzzle
   set HEIGHT [expr {$PCERADIUS*7.3}]
   set WIDTH [expr {$PCERADIUS*18 + $MARGIN*2}]
   #colors
   set BGCANVAS black      ;# canvas background
   set BGSUCCESS  #379737  ;# successful piece
-  set BGSUCCESS2 #155515  ;# border of successful piece
   set BGPENDING  #aaaa00  ;# pending piece
-  set BGPENDING1 #e48200  ;# border of moved piece
   set BGPENDING2 #8c8c4c  ;# border of pending piece
   set BGWAIT     #888888  ;# piece waiting
   set BGWAIT2    #464646  ;# border of pieces waiting
@@ -309,7 +300,8 @@ constructor {wpar level difficulty solo} {
   my BuildPuzzle
   my BuildAccessories
   my Start
-  my Message {Rotating two circles in "Puzzled", compose "Wanted" pattern} 99
+  my State rR
+  my Message {Composing "Wanted" pattern in "Puzzled"}
   bind $Win <Escape> "destroy $Win"
   bind $Win <F1> "[self] ShowHelp"
   update
@@ -338,7 +330,7 @@ method difficulty {{difficulty ""}} {
   return $Difficulty
 }
 
-## ________________________ Build GUI _________________________ ##
+## ________________________ GUI _________________________ ##
 
 method BuildMain {} {
   # Builds main frames of the puzzle.
@@ -346,8 +338,8 @@ method BuildMain {} {
   set Wcan  $Win.can
   set Wcan1 ${Wcan}1  ;# title
   set Wcan2 ${Wcan}2  ;# tools
-  set Wcan3 ${Wcan}3  ;# source
-  set Wcan4 ${Wcan}4  ;# target
+  set Wcan3 ${Wcan}3  ;# puzzle
+  set Wcan4 ${Wcan}4  ;# messages
   $Win configure -background $BGCANVAS ;# to avoid shimmering white-black
   wm title $Win $TITLE
   pack [canvas $Wcan1 -width $WIDTH -height $TTLHEIGHT -bg $BGCANVAS \
@@ -434,16 +426,16 @@ method BuildAccessories {} {
     -row 1 -padx $MARGIN -pady [expr {$Eps/2}] -columnspan 99 -sticky ew
   bind $Wcan2.butRun <Enter> [list [self] Message \
     "Restarts the current puzzle of level \[[self] level\]"]
-  bind $Wcan2.butEnt <Enter> "[self] Message {Sets the puzzle level from 1 to 8} 16"
+  bind $Wcan2.butEnt <Enter> "[self] Message {Sets the level difficulty from 1 to 9}"
   bind $Wcan2.butUp <Enter> "[self] Message {Saves the puzzle}"
   bind $Wcan2.butDown <Enter> "[self] Message {Restores the saved puzzle}"
   bind $Wcan2.butSOS <Enter> "[self] Message {Shows a stupid solution, move by move}"
-  bind $Wcan2.butHelp <Enter> "[self] Message {Helps with puzzling} 10"
-  bind $Wcan2.butExit <Enter> "[self] Message {Ends puzzling} 8"
+  bind $Wcan2.butHelp <Enter> "[self] Message {Helps with puzzling} 20"
+  bind $Wcan2.butExit <Enter> "[self] Message {Ends puzzling} 10"
   foreach i {Run Ent Up Down SOS Help Exit} {
     bind $Wcan2.but$i <Leave> "[self] Message {}"
   }
-  my State check
+  my State rC
 }
 
 ### ________________________ Puzzle Box _________________________ ###
@@ -484,6 +476,18 @@ method CircleCoords {x y r} {
 
   list [expr {int($x-$r)}] [expr {int($y-$r)}] \
     [expr {int($x+$r)}] [expr {int($y+$r)}]
+}
+#_______________________
+
+method TwoCircles {NP} {
+  # Gets data of two glued circles.
+  #   NP - current puzzle
+
+  lassign $Circles($NP) X1 Y1 R1 X2 Y2 R2 pieces crcpieces
+  lassign $crcpieces circle1 circle2
+  set circle1 [split $circle1 ,]
+  set circle2 [split $circle2 ,]
+  list $X1 $Y1 $R1 $X2 $Y2 $R2 $pieces $circle1 $circle2
 }
 #_______________________
 
@@ -568,15 +572,16 @@ method BindPiece {id ipce} {
 }
 #_______________________
 
-method TwoCircles {NP} {
-  # Gets data of two glued circles.
-  #   NP - current puzzle
+method ItemCenterXY {ID X Y} {
+  # Gets X, Y of item center
+  #   ID - id of item
+  #   X - X coordinate of item
+  #   Y - Y coordinate of item
 
-  lassign $Circles($NP) X1 Y1 R1 X2 Y2 R2 pieces crcpieces
-  lassign $crcpieces circle1 circle2
-  set circle1 [split $circle1 ,]
-  set circle2 [split $circle2 ,]
-  list $X1 $Y1 $R1 $X2 $Y2 $R2 $pieces $circle1 $circle2
+  lassign [$Wcan3 bbox $ID] x1 y1 x2 y2
+  set X [expr {$X-($x2-$x1)/2+1}]
+  set Y [expr {$Y-($y2-$y1)/2+1}]
+  list $X $Y
 }
 
 ## ________________________ Managing _________________________ ##
@@ -621,6 +626,157 @@ method BlinkAtStart {{color ""}} {
   }
 }
 #_______________________
+
+method State {mode} {
+  # Saves/restores the current state.
+  #   mode - "rC" (check), "w" (save user's will), "r" (restore user's will), \
+  #          "rW" (save all), "rR" (read all)
+
+  set res yes
+  set m0 [string index $mode 0]
+  catch {set ch [open $Rcfile $m0]}
+  switch $mode {
+    w {
+      foreach k $SavedState {
+        puts $ch $k\t$D($k)
+      }
+      puts $ch Level\t$Level
+      puts $ch Difficulty\t$Difficulty
+      $Wcan2.butDown configure -state normal
+      my Message "The puzzle saved"
+    }
+    r - rC {
+      set res no
+      catch {
+        foreach rc [split [read $ch] \n] {
+          lassign [split $rc \t] k val
+          switch -glob -- $k {
+            {} - S-* {}
+            Level - Difficulty {set $k $val}
+            puzzle {
+              set res yes
+              if {$mode eq {rC}} break
+              set D($k) $val
+              my Start $val
+            }
+            default {set D($k) $val}
+          }
+        }
+      } e
+      if {$res} {
+        if {$mode ne {rC}} {my RestoreState}
+      } else {
+        # saved puzzle not found
+        $Wcan2.butDown configure -state disabled
+      }
+    }
+    rW {
+      set fcont [list]
+      catch {
+        foreach rc [split [read $ch] \n] {
+          if {$rc ne {} && ![string match S-* $rc]} {
+            lappend fcont $rc  ;# state saved by user's will
+          }
+        }
+        close $ch
+      }
+      foreach k $SavedState {  ;# current state
+        lappend fcont S-$k\t$D($k)
+      }
+      lappend fcont S-Level\t$Level
+      lappend fcont S-Difficulty\t$Difficulty
+      set ch [open $Rcfile w]
+      foreach rc $fcont {puts $ch $rc}
+    }
+    rR {
+      set res no
+      catch {
+        foreach rc [split [read $ch] \n] {
+          lassign [split $rc \t] k val
+          lassign [split $k -] -> var
+          switch -glob -- $k {
+            S-Level - S-Difficulty {set $var $val}
+            S-puzzle {
+              set D($var) $val
+              my Start $val
+              set res yes
+            }
+            S-* {set D($var) $val}
+          }
+        }
+      } e
+      if {$res} {my RestoreState}
+    }
+  }
+  expr ![catch {close $ch}] && $res
+}
+#_______________________
+
+method RestoreState {} {
+  # Restores saved state of puzzle after reading it from .rc file.
+
+  set OldDifficulty $Difficulty
+  my ShufflePieces no $D(idxpce)
+  incr D(Move) -1
+  my ShowMove
+  my End
+  after idle "[self] Message {The puzzle restored}"
+}
+#_______________________
+
+method SaveState {} {
+  # Runs saving the current state.
+
+  after idle "[self] State rW"
+}
+#_______________________
+
+method SOS {} {
+  # Shows a solution (roll D(SOS) back).
+
+  my Message {}
+  my HideArrows
+  set timo 2000
+  if {!$D(givingWay)} {
+    set D(Move) 0
+    set D(givingWay) 1
+    my BlinkAtStart $BGMSG2
+    set D(clockwise) 0
+    set timo 3000
+  }
+  catch {after cancel $D(idSOS)}
+  set D(idSOS) [after $timo "[self] HideArrows"]
+  lassign [lindex $D(SOS) end-$D(Move)] sos D(clockwise)
+  set D(clockwise) [expr {-$D(clockwise)}]
+  my ShowArrows
+  my ShowMove yes
+  my ShufflePieces no $sos
+  set D(idxpce) $sos
+  update
+  my End
+  if {$D(end)} {
+    set D(givingWay) 0
+    incr D(Move) -1
+    my ShowMove
+  }
+}
+#_______________________
+
+method End {} {
+  # Checks if the puzzle is solved.
+
+  set D(end) no
+  if {[my ColorPieces]} {
+    my Message {G R E A T!  YOU DID IT!}
+    foreach crc {1 2} {
+      set id $D(ID,$D(puzzle)puzzle,crc$crc)
+      $Wcan3 itemconfigure $id -outline $BGSUCCESS
+    }
+    set D(end) yes
+  }
+}
+
+### ________________________ Main functions _________________________ ###
 
 method SelectPuzzle {idk} {
   # Select puzzle of menu.
@@ -671,13 +827,12 @@ method ShufflePieces {{doshuffle yes} {pattern ""}} {
             set neib $neib2
           }
           set ip [lindex $neib $dir]
-          my SupposeMoving $ipce $ip $circle1 $circle2 $neib1 $neib2
-          set D(idxpce) $D(idxpce-new)
+          set D(idxpce) [my SupposeMoving $ipce $ip $circle1 $circle2 $neib1 $neib2]
           if {$D(idxpce) eq $D(wanted)} {
             set i 99
             break
           }
-          set sos [list $D(idxpce-new) $D(clockwise)]
+          set sos [list $D(idxpce) $D(clockwise)]
           if {$sos != [lindex $D(SOS) end]} {
             lappend D(SOS) $sos
           }
@@ -690,17 +845,19 @@ method ShufflePieces {{doshuffle yes} {pattern ""}} {
       }
     }
     set D(orig,idxpce) $D(idxpce)
+    my SaveState
   }
   # update texts (numbers) & coordinates of pattern
   for {set ipce 1} {$ipce<=$numpce} {incr ipce} {
     $Wcan3 itemconfigure $D(ID,puzzle,txt$ipce) -text [lindex $D(idxpce) $ipce-1]
     lassign [lindex $D(coords) $ipce-1] -> id1 id2 x y
-    lassign [my CenterXY $id2 $x $y] x y
+    lassign [my ItemCenterXY $id2 $x $y] x y
     $Wcan3 moveto $id2 $x $y
   }
   if {$doshuffle eq {false}} {
     # if run with "Start" button, blink Puzzled
     my BlinkAtStart
+    my SaveState
   }
   my ColorPieces
 }
@@ -769,81 +926,6 @@ method Neighbors {ipce circle} {
 }
 #_______________________
 
-method CenterXY {ID X Y} {
-  # Gets X, Y of piece center
-  #   ID - id of piece
-  #   X - X coordinate of piece location
-  #   Y - Y coordinate of piece location
-
-  lassign [$Wcan3 bbox $ID] x1 y1 x2 y2
-  set X [expr {$X-($x2-$x1)/2+1}]
-  set Y [expr {$Y-($y2-$y1)/2+1}]
-  list $X $Y
-}
-#_______________________
-
-method ShowArrow {i j} {
-  # Create arrow from i-th to j-th piece.
-  #   i - index of i-th piece
-  #   j - index of j-th piece
-
-  if {[info exists D(arrow,1,$i)]} return
-  lassign [lindex $D(coords) $i] - - -> x1 y1
-  lassign [lindex $D(coords) $j] - - -> x2 y2
-  set d [expr {sqrt(($x1-$x2)**2 + ($y1-$y2)**2)}]
-  set k 0.24
-  set X1 [expr {$x1 + $k*($x2 - $x1)}]
-  set Y1 [expr {$y1 + $k*($y2 - $y1)}]
-  set X2 [expr {$x2 - $k*($x2 - $x1)}]
-  set Y2 [expr {$y2 - $k*($y2 - $y1)}]
-  set k 0.61
-  set z [expr {$k*$d}]
-  set z2 [expr {$z/8}]
-  set X [expr {$x1 + $k*($x2 - $x1)}]
-  set Y [expr {$y1 + $k*($y2 - $y1)}]
-  set cosA [expr {($x2 - $x1)/$d}]
-  set sinA [expr {($y2 - $y1)/$d}]
-  set XA [expr {$X - $z2*$sinA}]
-  set YA [expr {$Y + $z2*$cosA}]
-  set XB [expr {$X + $z2*$sinA}]
-  set YB [expr {$Y - $z2*$cosA}]
-  set D(arrow,1,$i) [$Wcan3 create polygon $X1 $Y1 $X2 $Y2 \
-    -outline $BGPENDING2 -fill $BGPENDING2 -width 5]
-  set D(arrow,2,$i) [$Wcan3 create polygon $X2 $Y2 $XB $YB $XA $YA \
-    -outline $BGPENDING2 -fill $BGPENDING2 -width 3]
-}
-#_______________________
-
-method ShowArrows {} {
-  # Show arrows on 1 or 2 circle, clockwise and counter.
-
-  lassign [lindex $D(coords) 0] - - - - - - circle1 circle2
-  switch $D(clockwise) {
-     1 {set arrlist [lreverse $circle1]}
-    -1 {set arrlist $circle1}
-     2 {set arrlist [lreverse $circle2]}
-    -2 {set arrlist $circle2}
-    default {my HideArrows; set arrlist [list]}
-  }
-  for {set i 0} {$i<[set llen [llength $arrlist]]} {incr i} {
-    set j [expr {$i==($llen-1) ? 0 : [expr {$i+1}]}]
-    set ii [expr {[lindex $arrlist $i]-1}]
-    set jj [expr {[lindex $arrlist $j]-1}]
-    my ShowArrow $ii $jj
-  }
-}
-#_______________________
-
-method HideArrows {} {
-  # Remove arrows.
-
-  foreach ak [array names D -glob arrow,*] {
-    $Wcan3 delete $D($ak)
-    unset D($ak)
-  }
-}
-#_______________________
-
 method ColorPieces {} {
   # Colorizes the puzzled pieces.
   # Returns yes, if all pieces are solved (green).
@@ -873,121 +955,9 @@ method ColorMenuPuzzle {NP color} {
   $Wcan3 itemconfigure $D(ID,${NP}menu,crc2) -fill $color
   $Wcan3 itemconfigure $D(ID,isec${NP}menu) -fill $color -outline $color
 }
-#_______________________
 
-method CheckDifficulty {d S} {
-  # At changing the puzzle difficulty.
-  #  d - action (%d of validate)
-  #  S - pressed char (%S of validate)
 
-  if {$d!=1 || $S<1 || $S>9 || ![string is digit $S]} {
-    if {$d==1} {
-      bell
-      after idle "[self] difficulty $OldDifficulty"
-    }
-    return 1
-  }
-  set OldDifficulty $S
-  after idle "[self] difficulty $OldDifficulty; [self] Start"
-  return 1
-}
-#_______________________
-
-method State {mode} {
-  # Saves/restores the current state.
-  #   mode - "w" (save), "r" (restore) or "check"
-
-  set fname [file normalize [info script]]
-  set fname [string range $fname 0 end-4].rc
-  if {![file exists $fname]} {set fname gluedcycles.rc}
-  if {![file exists $fname] || \
-  ($mode ne {check} && [catch {set ch [open $fname $mode]}])} {
-    $Wcan2.butDown configure -state disabled
-  } else {
-    $Wcan2.butDown configure -state normal
-  }
-  switch $mode {
-    w {
-      foreach k {puzzle idxpce orig,idxpce idxpce-new wanted clockwise SOS Move} {
-        puts $ch $k\t$D($k)
-      }
-      puts $ch Level\t$Level
-      puts $ch Difficulty\t$Difficulty
-      puts $ch OldDifficulty\t$OldDifficulty
-      $Wcan2.butDown configure -state normal
-      my Message "The puzzle saved"
-    }
-    r {
-      foreach rc [split [read $ch] \n] {
-        if {$rc ne {}} {
-          lassign [split $rc \t] k val
-          switch -- $k {
-            Level - Difficulty - OldDifficulty {set $k $val}
-            puzzle {
-              set D($k) $val
-              my Start $val
-            }
-            default {set D($k) $val}
-          }
-        }
-      }
-      my ShufflePieces no $D(idxpce)
-      incr D(Move) -1
-      my ShowMove
-      my End
-      my Message "The puzzle restored"
-    }
-  }
-  catch {close $ch}
-}
-#_______________________
-
-method SOS {} {
-  # Shows a solution (roll D(SOS) back).
-
-  my Message {}
-  my HideArrows
-  set timo 2000
-  if {!$D(givingWay)} {
-    set D(Move) 0
-    set D(givingWay) 1
-    my BlinkAtStart $BGMSG2
-    set D(clockwise) 0
-    set timo 3000
-  }
-  catch {after cancel $D(idSOS)}
-  set D(idSOS) [after $timo "[self] HideArrows"]
-  lassign [lindex $D(SOS) end-$D(Move)] sos D(clockwise)
-  set D(clockwise) [expr {-$D(clockwise)}]
-  my ShowArrows
-  my ShowMove yes
-  my ShufflePieces no $sos
-  set D(idxpce) $sos
-  update
-  my End
-  if {$D(end)} {
-    set D(givingWay) 0
-    incr D(Move) -1
-    my ShowMove
-  }
-}
-#_______________________
-
-method End {} {
-  # Checks if the puzzle is solved: all source pieces are fixed in target.
-
-  set D(end) no
-  if {[my ColorPieces]} {
-    my Message {G R E A T!  YOU DID IT!}
-    foreach crc {1 2} {
-      set id $D(ID,$D(puzzle)puzzle,crc$crc)
-      $Wcan3 itemconfigure $id -outline $BGSUCCESS
-    }
-    set D(end) yes
-  }
-}
-
-## ________________________ On events actions _________________________ ##
+### ________________________ On events actions _________________________ ###
 
 method OnButtonPress {ipce} {
   # Handles the mouse clicking a piece.
@@ -1066,6 +1036,88 @@ method OnButtonRelease {} {
     }
     my End
   }
+  my SaveState
+}
+#_______________________
+
+method CheckDifficulty {d S} {
+  # At changing the puzzle difficulty.
+  #  d - action (%d of validate)
+  #  S - pressed char (%S of validate)
+
+  if {$d!=1 || $S<1 || $S>9 || ![string is digit $S]} {
+    if {$d==1} {
+      bell
+      after idle "[self] difficulty $OldDifficulty"
+    }
+    return 1
+  }
+  set OldDifficulty $S
+  after idle "[self] difficulty $OldDifficulty; [self] Start"
+  return 1
+}
+
+### ________________________ Arrows _________________________ ###
+
+method ShowArrow {i j} {
+  # Create arrow from i-th to j-th piece.
+  #   i - index of i-th piece
+  #   j - index of j-th piece
+
+  if {[info exists D(arrow,1,$i)]} return
+  lassign [lindex $D(coords) $i] - - -> x1 y1
+  lassign [lindex $D(coords) $j] - - -> x2 y2
+  set d [expr {sqrt(($x1-$x2)**2 + ($y1-$y2)**2)}]
+  set k 0.24
+  set X1 [expr {$x1 + $k*($x2 - $x1)}]
+  set Y1 [expr {$y1 + $k*($y2 - $y1)}]
+  set X2 [expr {$x2 - $k*($x2 - $x1)}]
+  set Y2 [expr {$y2 - $k*($y2 - $y1)}]
+  set k 0.61
+  set z [expr {$k*$d}]
+  set z2 [expr {$z/8}]
+  set X [expr {$x1 + $k*($x2 - $x1)}]
+  set Y [expr {$y1 + $k*($y2 - $y1)}]
+  set cosA [expr {($x2 - $x1)/$d}]
+  set sinA [expr {($y2 - $y1)/$d}]
+  set XA [expr {$X - $z2*$sinA}]
+  set YA [expr {$Y + $z2*$cosA}]
+  set XB [expr {$X + $z2*$sinA}]
+  set YB [expr {$Y - $z2*$cosA}]
+  set D(arrow,1,$i) [$Wcan3 create polygon $X1 $Y1 $X2 $Y2 \
+    -outline $BGPENDING2 -fill $BGPENDING2 -width 5]
+  set D(arrow,2,$i) [$Wcan3 create polygon $X2 $Y2 $XB $YB $XA $YA \
+    -outline $BGPENDING2 -fill $BGPENDING2 -width 3]
+}
+#_______________________
+
+method ShowArrows {} {
+  # Show arrows on 1 or 2 circle, clockwise and counter.
+
+  lassign [lindex $D(coords) 0] - - - - - - circle1 circle2
+  switch $D(clockwise) {
+     1 {set arrlist [lreverse $circle1]}
+    -1 {set arrlist $circle1}
+     2 {set arrlist [lreverse $circle2]}
+    -2 {set arrlist $circle2}
+    default {my HideArrows; set arrlist [list]}
+  }
+  for {set i 0} {$i<[set llen [llength $arrlist]]} {incr i} {
+    set j [expr {$i==($llen-1) ? 0 : [expr {$i+1}]}]
+    set ii [expr {[lindex $arrlist $i]-1}]
+    set jj [expr {[lindex $arrlist $j]-1}]
+    my ShowArrow $ii $jj
+  }
+}
+#_______________________
+
+method HideArrows {} {
+  # Remove arrows.
+
+  foreach ak [array names D -glob arrow,*] {
+    $Wcan3 delete $D($ak)
+    unset D($ak)
+  }
 }
 
 ## ________________________ Messages _________________________ ##
@@ -1138,17 +1190,12 @@ To rotate a cycle, click and
 drag its piece and drop it
 on one of its neighbors.
 
-To select a puzzle level,
-click one of patterns or
-enter it in the entry. To
-restart the current puzzle,
-click the button "Restart".
+Clicking a puzzle pattern or
+entering "Difficulty" value
+starts a new puzzle.
 
-The puzzle can be run so:
-  wish gluedcycles.tcl L D
-where:
-L - level (1..8, default 3)
-D - difficulty (1..9, default 3)
+Clicking the button "Restart"
+restarts the current puzzle.
         ____________________
 
 https://github.com/aplsimple}
@@ -1160,25 +1207,11 @@ https://github.com/aplsimple}
 
 # ________________________ Run the puzzle _________________________ #
 
-set gluedcycles::solo [expr {[info exist ::argv0] && \
-  [file normalize $::argv0] eq [file normalize [info script]]}]
-
-if {$gluedcycles::solo} {  ;# run as stand-alone app
+if {[info exist ::argv] && [info exist ::argv0] && \
+[file normalize $::argv0] eq [file normalize [info script]]} {
+  # run as stand-alone app
   wm withdraw .
-  lassign $::argv level difficulty
-  set dlev [set gluedcycles::defaultLevel]
-  if {$level eq {}} {set level $dlev}
-  set ddif [set gluedcycles::defaultDifficulty]
-  if {$difficulty eq {}} {set difficulty $ddif}
-  if {$::argc>2 || ![string is digit -strict $level] || $level<1 || $level>8 ||
-  ![string is digit -strict $difficulty] || $difficulty<1 || $difficulty>9} {
-    puts "\nRun the puzzle this way:\n  wish [info script] ?level? ?difficulty? \
-    \nwhere level - puzzle level (1..8), by default $dlev\
-    \n      difficulty - puzzle difficulty (1..9), by default $ddif\n
-    "
-    exit
-  }
-  gluedcycles::run . $level $difficulty yes
+  gluedcycles::run . [lindex $::argv 0] yes
 }
 
 # ________________________ EOF _________________________ #

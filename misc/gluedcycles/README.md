@@ -8,9 +8,9 @@ The pieces are included in two glued cycles: left and right. Both are rotated cl
 
 To rotate a cycle, click and drag its piece and drop it on one of its neighbors.
 
-To start a new puzzle, click one of patterns. Or enter new *Difficulty* which relates to the shuffling.
+Clicking a puzzle pattern or entering *Difficulty* value starts a new puzzle.
 
-To restart the current puzzle, click the button *Restart*.
+Clicking the button *Restart* restarts the current puzzle.
 
 Other buttons allow:
 
@@ -20,11 +20,9 @@ Other buttons allow:
 
 The puzzle can be run so:
 
-    tclsh gluedcycles.tcl ?LEVEL? ?DIFFICULTY?
+    tclsh gluedcycles.tcl ?RESOURCE?
 
-where:
-  LEVEL - puzzle level (pattern), from 1 to 8, by default 3
-  DIFFICULTY - difficulty, from 1 to 9, by default 3
+where RESOURCE - path to .rc file, by default *./gluedcycles.rc*
 
 
 # Links
@@ -54,7 +52,7 @@ The solution offered by the program is in no way the best. The solution moves ar
 
 But sometimes the solution is smart. Also, some puzzles are trivial, while others are pretty hard, few being even beautiful.
 
-When some puzzle seems to be interesting, you can save it with *Save* button, to restore it with *Restore* button some day.
+When some puzzle seems to be interesting, you can save it with *Save* button, to restore it with *Restore* button some day. Anyhow, a current puzzle is saved "on fly" to be restored in the program's next session.
 
 And when the puzzle seems to be hard, you can make it easier with clicking *Show solution* button till the horizon becomes clearer.
 

@@ -738,11 +738,6 @@ can drag-and-drop it. Or
 just click it, then move to
 a target and click again.
 Or click a vacant target.
-
-The puzzle can be run so:
-  wish samloyd279.tcl NP
-where NP - number of pieces
-from 8 to 24, by default 12.
         ____________________
 
 https://github.com/aplsimple}
