@@ -52,6 +52,45 @@ PU+EHTbv0zPngMNw7d2O8DSQgqiUc8wIBR5LZoIjYVH+2vldICsqdvbs69dFKBBVicuOj4kARUJT
 b0rF7p4j/XdmyCOZwGA2PxsSCWv+Xttz6uozWXZmAX/khOu8eG71grql31b/+vN5hjY3Lwt6khRa
 +eHT4q8r17EpmTr5iGLLC5pLlq1T5bATZMSVH3h0rPhZmRgGAgAA43LedPuyX/QAAAAASUVORK5C
 YII=}
+  image create photo gluedcycles::undo -data  {iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAB2lBMVEUAAAAwKiozLS0AAABEJSU9
+LCwtJyc7KSkyLCwxKysAAABMGxtQGBhCICA6MzMlISE6MzNRFRVLHh5CJiZIHx9HIyNDKChEIiJC
+KSkvKSk8Ly8tJyc0Li42MDA6MzMpJCQAAAAAAABKHBxIICA+KCgzLS07JCQ5KCgsJyc+Kio2Ly81
+Ly8PDQ3/iYmMGxv/zc3/x8f/w8P/hob/b2//sLD/qqr/goKyZmb/RUX/Pj5kGBhVExP/2Nj/ysr/
+wMD1v7//vb3/ubn/trb/tLT/srL/mJj/k5PFfn7/cnL/TU3/Skr/QkJPGRn/5ub/2tr/vLz/p6f/
+paX/pKT/oKD/nZ3/m5vYmZn/jY3/enr/d3f/Xl7/VlafTEyTQUFwIiJgHR1SFhaHExP/8fH/3Nz/
+0dH/z8//xcX/ra3/oqLPjIz/fX3/dHT/aWn/ZGSoWVmyVlb/UlL/UVH/Ozv1NTWINDTYLCyyHx+B
+FRX//Pz/4OD/09P109P/uLj1trbis7PrsrLira3ipaXrnp7/lZX1jo7Pfn68fn7/eHi8dnbYc3O8
+cnL1cHCcPj7rPT2cNTWJLy+MLS19LCzFKiqCJiZuJibFJSWTHh5wGRlqExN9ERFkERGVEBB/EBBk
+EBAatIq6AAAALXRSTlMAmQ8E0Z41py0gDPLvzG9ZP/Lv3NzPv7+vh39vaVxPFhQJ5eLIsrKMfHJm
+VjxKEXURAAAB1UlEQVQ4y2JABkxiwhwMeICAUF85Ix55Kes2Pz3cCpgk4uoqbHAr4BCJrU5KSsWp
+gC/BvNLX19dAz0ecjwmL8axWYcnJfn42NjYNHSU+rJzoxov221elpKTq69va2hqkNfXw8KHIy/Lk
+G9gaGKQZGtrZOfg71jg5d06XQLKH1arV0BAo4+/o5OxiYpJuahoQ2FLOglDh4+5sApIDSQUGZQSH
+hLo2u4VPY2GGKdCMd3d0DQkMgMi5uYWH6xoZmXXPYYcboc0dY+hqZKQLAiC5iGyP3KiC3lmycBWc
+LBPrA8yyIiI9jHNycqOioqMLPb0sJnHLw1Uws8ZnOuiCFOjr6zuFZoMVeCeqI3lVSzDPwA2oQM/a
+KrbL3sEYpKCUGznAAGNjKbE3bTfWU+WXFLbOsw8qsPC2nCmNEtzsVmF2ZqDIUmRTsQpz8fS2nCqi
+iBKiMgnm+hMYwW6SEXR38bIstmZDjRM25djJjFAmj3uwZVGiJFqsybPz8sOSn3VjVlGZODOaCmYF
+eBRIxRlalCop4EmiouZmxQkc+NJ4fK3lXH58uUDM3DhRA58CuSkmsxkZ8AGhzDJGZnwKWGPy2bnw
+2hFnzotXAYNPDAEFLDPU8CvglNZhBgDOxma2VxaO8gAAAABJRU5ErkJggg==}
+  image create photo gluedcycles::redo -data {iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAB2lBMVEUAAAA6MzMAAAAAAAA2LS0h
+HBwPDQ0AAABIMzM+MjI9MzMAAAA6MzMAAABIMjJCMzNCMzM9Ly87MzMrJiYoIyM7MzM6MzMAAAAA
+AABEMTE/MDA1LCwzKiowKCgYFRU6MzM6MzNCMTFEMzM/MzM9MzMzLS06MzMAAABRMzP/pBZNMzP/
+5LVJMzP//5n/15P/04rf2IX/u0L/uT5YPzn/qR3/oRH/nQf/893/68n/5rv/4Kj/3qT/3KD/znz/
+ynT/xGH/wV1xWUb/nw3/7c3/6L//4rD/253/2pr/2pX/+5P/15D/1I7/0oH/6nzKv3n/zXehjF//
+xF2Wf1n/wVR/ZkxmSj//tjpbPjdcOjL/siz/rSnAdRj/+Oz/4KvVvKDq5Yz/8Yn/0YX/z4DAsnL/
+yG7/32r/yGn/3Gb/1mb/xWb/x1b/ylH/vU16Zkz/vUn/uEX/xEJzUED/tDb/szOKVCbqkRD//vz/
+9OL06Nf03LXfy7T/25j08pLqyZH07In06Ij/24LKqYDVzH/Vrn+rjnr/43f/33b/5nShgnGrmWah
+fmPfqmK1iVyKaVr/0FnfpVO1hU9/XEpvWUZnSUTfnUBXOTF6Ui9lPyxzRir/qyOWWyOhYB7VgA/0
+lQlx74ncAAAAKHRSTlMAPwMnslk8HO+wnxUPCfLfz8x/f3JvXy0N5dilmYtMLx/lv7+PWU8G8Tuy
+bgAAAdhJREFUOMtiwADK/IwM+ACj1gQtUbwKNNyqQjl58ClwL6vo5ZfHo0AvJqa8RQeHNWKcHBr6
+5kAQF8GFxRohjskdcRZA4OzsXDlRQB7dcP7CZm0QsLS0dHFxseziEEORF9Xq0XOzsbG2trKKjXV1
+ddXWbgznQpLniujW1/f29tLT83B3hyqsLRTggVsf0W9n529rm5SUmAhU6OWl51Ht0VAfygqVV5s6
+xcHBPjMzLSUFrM7Hx8c/rc3AUZANIs/DEa0ZVZSfnxMMVGYfaB8YGByclZBsLCPOC3VAiammponJ
+zKioyOKiMCNDw7ycDM8gPhFmJlgElYIVFPf56urqZoMUtMY7Sslxw1zIOcsJqCAyVdcvaJKWBtCE
+rAQ/Y2mg8VAAmIJWKVBBtm5yqKS0iCxQQYZnAJ8wMxMihEvMnEzT40MUhZm5mRg1jHxrQqRY2ZHC
+SCDazCndIJyFTQIcm55NxhAmwoa5ZgUG4bIQMxm1OnUgxiOieIaZSZ0jC0yQUxBiPAKozDZrDxAU
+h2li4pZAi2al6EgDHTle3KlQZ05qiAw7Ax4FmgZ8bEz4knFBEAs+Axin+xqzquNTMM1PkhlvVsoN
+YOHGr8BRhBevAmMdNga8QJUVnx8AecZkFWbl0sMAAAAASUVORK5CYII=}
+
   image create photo gluedcycles::download -data  {iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAABtlBMVEUAAADDAADLAAC5AADzAAGO
 OSWkAQDYAACQOCWyAgC4AADqAAKNMh+KKxjHAwfcAATuAALNAAKFKBKPNSKMMBuIKBSSNybnAAWK
 FQZ7EwB9IQiHCwCNNiGKFQOONiOfEQi1BQKvMTP/GTHlGSm1GR/XFB7KEhvZCxKxFxe2DAmNDgST
@@ -203,7 +242,8 @@ constructor {wpar rcfile solo} {
   # methods available only during the puzzle
   oo::objdefine [self] {
     export Message ShowHelp CheckMessage Start CheckDifficulty ShufflePieces SOS \
-      HideArrows State OnButtonPress OnButtonMotion OnButtonRelease
+      HideArrows State SaveState UndoRedo ShowMove End \
+      OnButtonPress OnButtonMotion OnButtonRelease
   }
 
   # Data of circles & pieces:
@@ -267,7 +307,7 @@ constructor {wpar rcfile solo} {
   set Level [set Difficulty [set OldDifficulty 3]]
   set Rcfile $rcfile
   set Eps 8
-  set SavedState {puzzle idxpce orig,idxpce wanted SOS Move}
+  set SavedState {puzzle idxpce orig,idxpce wanted SOS History Move end}
   set TITLE {Glued cycles}
   set FONTLARGE {Helvetica 26 bold}  ;# title font
   set FONTSMALL {Helvetica 14 bold}  ;# message font
@@ -383,7 +423,7 @@ method BuildPuzzle {} {
   foreach idk [array names D -glob *menu*] {
     $Wcan3 bind $D($idk) <ButtonPress> "[self] Start $idk"
   }
-  my SelectPuzzle $D(puzzle)
+  my HighlightPuzzle $D(puzzle)
 }
 #_______________________
 
@@ -404,35 +444,44 @@ method BuildAccessories {} {
     -row 0 -column 2 -sticky w -padx 8
   grid [label $Wcan2.space -text { } -bg $BGCANVAS] -row 0 -column 3 -sticky ew
   grid columnconfigure $Wcan2 3 -weight 9
+  grid [button $Wcan2.butUndo -image gluedcycles::undo -bg $BGCANVAS \
+    -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
+    -highlightcolor $BGMSG -command "[self] UndoRedo -2"] -row 0 -column 4
+  grid [button $Wcan2.butRedo -image gluedcycles::redo -bg $BGCANVAS \
+    -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
+    -highlightcolor $BGMSG -command "[self] UndoRedo 0"] -padx 4 -row 0 -column 5
+  grid [label $Wcan2.spaceDo -text {} -bg $BGCANVAS] -padx $pad2 -row 0 -column 6
   grid [button $Wcan2.butUp -image gluedcycles::upload -bg $BGCANVAS \
     -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
-    -highlightcolor $BGMSG -command "[self] State w"] -row 0 -column 4
+    -highlightcolor $BGMSG -command "[self] State w"] -row 0 -column 7
   grid [button $Wcan2.butDown -image gluedcycles::download -bg $BGCANVAS \
     -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
-    -highlightcolor $BGMSG -command "[self] State r"] -padx 4 -row 0 -column 5
-  grid [label $Wcan2.space2 -text {} -bg $BGCANVAS] -padx $pad2 -row 0 -column 6
+    -highlightcolor $BGMSG -command "[self] State r"] -padx 4 -row 0 -column 8
+  grid [label $Wcan2.space2 -text {} -bg $BGCANVAS] -padx $pad2 -row 0 -column 9
   grid [button $Wcan2.butSOS -image gluedcycles::sos -bg $BGCANVAS \
     -activebackground $BGWAIT2 -highlightbackground $BGCANVAS -highlightcolor $BGMSG \
-    -command "[self] SOS"] -row 0 -column 7
+    -command "[self] SOS"] -row 0 -column 10
   grid [button $Wcan2.butHelp -image gluedcycles::helpImage -bg $BGCANVAS \
     -activebackground $BGWAIT2 -highlightbackground $BGCANVAS -highlightcolor $BGMSG \
-    -command "[self] ShowHelp"] -row 0 -column 8 -padx 4
-  grid [label $Wcan2.space3 -text {} -bg $BGCANVAS] -padx $pad2 -row 0 -column 9
+    -command "[self] ShowHelp"] -row 0 -column 11 -padx 4
+  grid [label $Wcan2.space3 -text {} -bg $BGCANVAS] -padx $pad2 -row 0 -column 12
   grid [button $Wcan2.butExit -image gluedcycles::exitImage -bg $BGCANVAS \
     -activebackground $BGWAIT2 -highlightbackground $BGCANVAS -highlightcolor $BGMSG \
-    -command "destroy $Win"] -row 0 -column 10
-  grid [label $Wcan2.space4 -text {} -bg $BGCANVAS] -padx $pad2 -row 0 -column 11
+    -command "destroy $Win"] -row 0 -column 13
+  grid [label $Wcan2.space4 -text {} -bg $BGCANVAS] -padx $pad2 -row 0 -column 14
   grid [ttk::separator $Wcan2.separ -orient horizontal] \
     -row 1 -padx $MARGIN -pady [expr {$Eps/2}] -columnspan 99 -sticky ew
   bind $Wcan2.butRun <Enter> [list [self] Message \
     "Restarts the current puzzle of level \[[self] level\]"]
   bind $Wcan2.butEnt <Enter> "[self] Message {Sets the level difficulty from 1 to 9}"
+  bind $Wcan2.butUndo <Enter> "[self] Message {Undo}"
+  bind $Wcan2.butRedo <Enter> "[self] Message {Redo}"
   bind $Wcan2.butUp <Enter> "[self] Message {Saves the puzzle}"
   bind $Wcan2.butDown <Enter> "[self] Message {Restores the saved puzzle}"
   bind $Wcan2.butSOS <Enter> "[self] Message {Shows a stupid solution, move by move}"
   bind $Wcan2.butHelp <Enter> "[self] Message {Helps with puzzling} 20"
   bind $Wcan2.butExit <Enter> "[self] Message {Ends puzzling} 10"
-  foreach i {Run Ent Up Down SOS Help Exit} {
+  foreach i {Run Ent Undo Redo Up Down SOS Help Exit} {
     bind $Wcan2.but$i <Leave> "[self] Message {}"
   }
   my State rC
@@ -591,7 +640,7 @@ method Start {{idk ""} {doshuffle yes}} {
   #   idk - id of menu puzzle or index of the puzzle
   #   doshuffle - if no, use the original shuffled pattern
 
-  if {$idk ne {}} {my SelectPuzzle $idk}
+  if {$idk ne {}} {my HighlightPuzzle $idk}
   foreach id [array names D -glob *] {
     if {[string match *goal* $id] || [string match *puzzle* $id]} {
       $Wcan3 delete $D($id)
@@ -604,8 +653,8 @@ method Start {{idk ""} {doshuffle yes}} {
   set Level [string index $D(puzzle) end]
   set D(click) [set D(end) no]
   set D(dndXY) [set D(dndtime) {}]
-  set D(Move) 0
   set D(givingWay) 0
+  set D(Move) 0
   my ShowMove
 }
 #_______________________
@@ -732,16 +781,16 @@ method SaveState {} {
 #_______________________
 
 method SOS {} {
-  # Shows a solution (roll D(SOS) back).
+  # Shows a solution: rolls D(SOS) back.
 
   my Message {}
   my HideArrows
   set timo 2000
   if {!$D(givingWay)} {
-    set D(Move) 0
     set D(givingWay) 1
-    my BlinkAtStart $BGMSG2
+    set D(Move) 0
     set D(clockwise) 0
+    my BlinkAtStart $BGMSG2
     set timo 3000
   }
   catch {after cancel $D(idSOS)}
@@ -752,6 +801,7 @@ method SOS {} {
   my ShowMove yes
   my ShufflePieces no $sos
   set D(idxpce) $sos
+  my InitUndoRedo
   update
   my End
   if {$D(end)} {
@@ -765,32 +815,21 @@ method SOS {} {
 method End {} {
   # Checks if the puzzle is solved.
 
-  set D(end) no
-  if {[my ColorPieces]} {
-    my Message {G R E A T!  YOU DID IT!}
+  if {!$D(end)} {
+    if {[my ColorPieces]} {
+      my Message {G R E A T!  YOU DID IT!}
+      set D(end) yes
+    }
+  }
+  if {$D(end)} {
     foreach crc {1 2} {
       set id $D(ID,$D(puzzle)puzzle,crc$crc)
       $Wcan3 itemconfigure $id -outline $BGSUCCESS
     }
-    set D(end) yes
   }
 }
 
 ### ________________________ Main functions _________________________ ###
-
-method SelectPuzzle {idk} {
-  # Select puzzle of menu.
-  #   id - id of menu puzzle or index of the puzzle
-
-  set NP P[string index $idk [string first menu $idk]-1]
-  if {$NP eq {P}} {set NP $idk}
-  if {[info exists D(prevpuzzle)]} {
-    my ColorMenuPuzzle $D(prevpuzzle) $BGCANVAS
-  }
-  my ColorMenuPuzzle $NP $BGPENDING2
-  set D(puzzle) [set D(prevpuzzle) $NP]
-}
-#_______________________
 
 method ShufflePieces {{doshuffle yes} {pattern ""}} {
   # Shuffles puzzle pieces.
@@ -845,6 +884,7 @@ method ShufflePieces {{doshuffle yes} {pattern ""}} {
       }
     }
     set D(orig,idxpce) $D(idxpce)
+    my InitUndoRedo
     my SaveState
   }
   # update texts (numbers) & coordinates of pattern
@@ -857,6 +897,7 @@ method ShufflePieces {{doshuffle yes} {pattern ""}} {
   if {$doshuffle eq {false}} {
     # if run with "Start" button, blink Puzzled
     my BlinkAtStart
+    my InitUndoRedo
     my SaveState
   }
   my ColorPieces
@@ -946,6 +987,20 @@ method ColorPieces {} {
 }
 #_______________________
 
+method HighlightPuzzle {idk} {
+  # Highlights a puzzle in menu.
+  #   id - id of menu puzzle or index of the puzzle
+
+  set NP P[string index $idk [string first menu $idk]-1]
+  if {$NP eq {P}} {set NP $idk}
+  if {[info exists D(prevpuzzle)]} {
+    my ColorMenuPuzzle $D(prevpuzzle) $BGCANVAS
+  }
+  my ColorMenuPuzzle $NP $BGPENDING2
+  set D(puzzle) [set D(prevpuzzle) $NP]
+}
+#_______________________
+
 method ColorMenuPuzzle {NP color} {
   # Colors puzzle of menu.
   #   NP - puzzle index
@@ -955,7 +1010,6 @@ method ColorMenuPuzzle {NP color} {
   $Wcan3 itemconfigure $D(ID,${NP}menu,crc2) -fill $color
   $Wcan3 itemconfigure $D(ID,isec${NP}menu) -fill $color -outline $color
 }
-
 
 ### ________________________ On events actions _________________________ ###
 
@@ -1030,6 +1084,7 @@ method OnButtonRelease {} {
   if {[info exist D(idxpce-new)]} {
     if {$D(clockwise)} {
       my ShufflePieces no $D(idxpce-new)
+      my AddUndoRedo
       my ShowMove
     } else {
       my ShufflePieces no $D(idxpce) ;# rolled back
@@ -1055,6 +1110,58 @@ method CheckDifficulty {d S} {
   set OldDifficulty $S
   after idle "[self] difficulty $OldDifficulty; [self] Start"
   return 1
+}
+
+### ________________________ Undo / Redo _________________________ ###
+
+method InitUndoRedo {} {
+  # Initializes undo/redo history.
+
+  set D(History) [list [list $D(idxpce) 0]]
+}
+#_______________________
+
+method AddUndoRedo {} {
+  # Adds item to undo/redo history.
+
+  set D(History) [list {*}[lrange $D(History) 0 $D(Move)] \
+    [list $D(idxpce) $D(clockwise)]]
+}
+#_______________________
+
+method CheckUndoRedo {} {
+  # Checks availability of undo/redo.
+
+  if {[lindex $D(History) $D(Move)-2] ne {}} {
+    $Wcan2.butUndo configure -state normal
+  } else {
+    $Wcan2.butUndo configure -state disabled
+  }
+  if {[lindex $D(History) $D(Move)] ne {}} {
+    $Wcan2.butRedo configure -state normal
+  } else {
+    $Wcan2.butRedo configure -state disabled
+  }
+}
+#_______________________
+
+method UndoRedo {dmove} {
+  # Shifts and displays undo/redo history.
+  #   dmove - shift in history
+
+  incr D(Move) $dmove
+  lassign [lindex $D(History) $D(Move)] D(idxpce) D(clockwise)
+  if {$dmove<0} {
+    lassign [lindex $D(History) $D(Move)+1] -> D(clockwise)
+    set D(clockwise) [expr {-$D(clockwise)}]
+  }
+  my ShowArrows
+  after 500 " \
+    [self] HideArrows; \
+    [self] ShufflePieces no {$D(idxpce)}; \
+    [self] ShowMove; \
+    [self] SaveState; \
+    [self] End"
 }
 
 ### ________________________ Arrows _________________________ ###
@@ -1169,6 +1276,7 @@ method ShowMove {{alert 0}} {
   $Wcan3 itemconfigure $D(PuzzledID) -fill $color \
     -text "$D(PuzzledLabel): moves $D(Move) / $movemax"
   incr D(Move)
+  my CheckUndoRedo
 }
 #_______________________
 

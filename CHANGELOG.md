@@ -1,6 +1,12 @@
 # LAST CHANGES
 
 
+`27 Dec'24`
+
+  - NEW   : undo/redo
+  - CHANGE: docs
+
+
 `26 Dec'24`
 
   - DELETE: *level* and *difficulty* arguments
