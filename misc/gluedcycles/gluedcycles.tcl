@@ -210,7 +210,7 @@ tc3Ny87Os/P1MPFYL6CPliil2d+nPF2YZm1t7W5i7cmhB9OPAKwi3Kutlrq5LVu5llNICWvOUJYT
 oo::class create gluedcycles::Puzzle {
 
   variable TITLE PCERADIUS FONTLARGE FONTSMALL
-  variable TTLHEIGHT TOOLHEIGHT MSGHEIGHT MARGIN HEIGHT WIDTH
+  variable TTLHEIGHT TOOLHEIGHT MSGHEIGHT MARGIN HEIGHT WIDTH TIMOARR
   variable BGSUCCESS BGPENDING BGCANVAS BGWAIT BGMSG BGMSG2
   variable BGPENDING2 BGWAIT2 FGCIRCLE1 FGCIRCLE2
   variable Win Level Difficulty OldDifficulty Rcfile Solo
@@ -224,6 +224,7 @@ constructor {wpar rcfile solo} {
 
   my variable WIDTH    ;# width of puzzle
   my variable HEIGHT   ;# height of puzzle (without accessories)
+  my variable TIMOARR  ;# timeout for arrows
   my variable Win      ;# puzzle window
   my variable Solo     ;# if run stand-alone
   my variable Level    ;# level
@@ -311,6 +312,7 @@ constructor {wpar rcfile solo} {
   set TITLE {Glued cycles}
   set FONTLARGE {Helvetica 26 bold}  ;# title font
   set FONTSMALL {Helvetica 14 bold}  ;# message font
+  set TIMOARR 1000
   # sizes
   set PCERADIUS 50   ;# radius of piece
   set TTLHEIGHT 60   ;# height of title
@@ -785,14 +787,14 @@ method SOS {} {
 
   my Message {}
   my HideArrows
-  set timo 2000
+  set timo $TIMOARR
   if {!$D(helpingSOS)} {
     my Message {Start of the stupid solution!}
     set D(helpingSOS) yes
     set D(Move) 0
     set D(clockwise) 0
     my BlinkAtStart $BGMSG2
-    set timo 3000
+    incr timo $TIMOARR
   }
   catch {after cancel $D(idSOS)}
   set SOSlength [llength $D(SOS)]
@@ -1163,11 +1165,12 @@ method UndoRedo {dmove} {
     lassign [lindex $D(History) $D(Move)+1] -> D(clockwise)
     set D(clockwise) [expr {-$D(clockwise)}]
   }
+  my ShowMove
+  my CheckUndoRedo
   my ShowArrows
-  after 500 " \
+  after $TIMOARR " \
     [self] HideArrows; \
     [self] ShufflePieces no {$D(idxpce)}; \
-    [self] ShowMove; \
     [self] SaveState; \
     [self] End"
 }
