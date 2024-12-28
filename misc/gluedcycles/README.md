@@ -1,6 +1,6 @@
 # What's that
 
-This puzzle's idea is borrowed from the book *Mathematical Puzzles* by V. N. Dubrovsky and A. T. Kalinin.
+This puzzle's idea is borrowed from the book *Mathematical Puzzles* by [V. N. Dubrovsky and A. T. Kalinin](https://www.ejmste.com/article/puzzles-as-a-didactic-tool-for-development-of-mathematical-abilities-of-junior-schoolchildren-in-5558).
 
 The task of the puzzle is to rotate *Puzzled* pieces so that they compose *Wanted* pattern, as for numbers.
 
@@ -16,7 +16,9 @@ Other buttons allow:
 
    * to save the current puzzle
    * to restore the saved puzzle
-   * show one of possible solutions
+   * to undo/redo moves
+   * to show one of possible solutions
+   * to show rules
 
 The puzzle can be run so:
 

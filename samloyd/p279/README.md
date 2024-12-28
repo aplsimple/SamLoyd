@@ -1,4 +1,4 @@
-This is 279th puzzle from Sam Loyd's book *Mathematical Puzzles*.
+This is 279th puzzle from the book *Mathematical Puzzles* by [Sam Loyd](https://en.wikipedia.org/wiki/Sam_Loyd).
 
 The task of the puzzle is to move all pieces from the source to the target (*to fix them*).
 
