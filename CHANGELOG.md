@@ -1,6 +1,11 @@
 # LAST CHANGES
 
 
+`28 Dec'24`
+
+  - CHANGE: undo/redo & stupid solution to be friends
+
+
 `27 Dec'24`
 
   - NEW   : undo/redo

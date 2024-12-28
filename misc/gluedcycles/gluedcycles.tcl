@@ -444,19 +444,19 @@ method BuildAccessories {} {
     -row 0 -column 2 -sticky w -padx 8
   grid [label $Wcan2.space -text { } -bg $BGCANVAS] -row 0 -column 3 -sticky ew
   grid columnconfigure $Wcan2 3 -weight 9
-  grid [button $Wcan2.butUndo -image gluedcycles::undo -bg $BGCANVAS \
-    -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
-    -highlightcolor $BGMSG -command "[self] UndoRedo -2"] -row 0 -column 4
-  grid [button $Wcan2.butRedo -image gluedcycles::redo -bg $BGCANVAS \
-    -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
-    -highlightcolor $BGMSG -command "[self] UndoRedo 0"] -padx 4 -row 0 -column 5
-  grid [label $Wcan2.spaceDo -text {} -bg $BGCANVAS] -padx $pad2 -row 0 -column 6
   grid [button $Wcan2.butUp -image gluedcycles::upload -bg $BGCANVAS \
     -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
-    -highlightcolor $BGMSG -command "[self] State w"] -row 0 -column 7
+    -highlightcolor $BGMSG -command "[self] State w"] -row 0 -column 4
   grid [button $Wcan2.butDown -image gluedcycles::download -bg $BGCANVAS \
     -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
-    -highlightcolor $BGMSG -command "[self] State r"] -padx 4 -row 0 -column 8
+    -highlightcolor $BGMSG -command "[self] State r"] -padx 4 -row 0 -column 5
+  grid [label $Wcan2.spaceDo -text {} -bg $BGCANVAS] -padx $pad2 -row 0 -column 6
+  grid [button $Wcan2.butUndo -image gluedcycles::undo -bg $BGCANVAS \
+    -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
+    -highlightcolor $BGMSG -command "[self] UndoRedo -2"] -row 0 -column 7
+  grid [button $Wcan2.butRedo -image gluedcycles::redo -bg $BGCANVAS \
+    -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
+    -highlightcolor $BGMSG -command "[self] UndoRedo 0"] -padx 4 -row 0 -column 8
   grid [label $Wcan2.space2 -text {} -bg $BGCANVAS] -padx $pad2 -row 0 -column 9
   grid [button $Wcan2.butSOS -image gluedcycles::sos -bg $BGCANVAS \
     -activebackground $BGWAIT2 -highlightbackground $BGCANVAS -highlightcolor $BGMSG \
@@ -478,7 +478,7 @@ method BuildAccessories {} {
   bind $Wcan2.butRedo <Enter> "[self] Message {Redo}"
   bind $Wcan2.butUp <Enter> "[self] Message {Saves the puzzle}"
   bind $Wcan2.butDown <Enter> "[self] Message {Restores the saved puzzle}"
-  bind $Wcan2.butSOS <Enter> "[self] Message {Shows a stupid solution, move by move}"
+  bind $Wcan2.butSOS <Enter> "[self] Message {Shows a stupid solution, move by move} 30 no yes"
   bind $Wcan2.butHelp <Enter> "[self] Message {Helps with puzzling} 20"
   bind $Wcan2.butExit <Enter> "[self] Message {Ends puzzling} 10"
   foreach i {Run Ent Undo Redo Up Down SOS Help Exit} {
@@ -653,7 +653,7 @@ method Start {{idk ""} {doshuffle yes}} {
   set Level [string index $D(puzzle) end]
   set D(click) [set D(end) no]
   set D(dndXY) [set D(dndtime) {}]
-  set D(givingWay) 0
+  set D(helpingSOS) no
   set D(Move) 0
   my ShowMove
 }
@@ -786,28 +786,31 @@ method SOS {} {
   my Message {}
   my HideArrows
   set timo 2000
-  if {!$D(givingWay)} {
-    set D(givingWay) 1
+  if {!$D(helpingSOS)} {
+    my Message {Start of the stupid solution!}
+    set D(helpingSOS) yes
     set D(Move) 0
     set D(clockwise) 0
     my BlinkAtStart $BGMSG2
     set timo 3000
   }
   catch {after cancel $D(idSOS)}
-  set D(idSOS) [after $timo "[self] HideArrows"]
-  lassign [lindex $D(SOS) end-$D(Move)] sos D(clockwise)
-  set D(clockwise) [expr {-$D(clockwise)}]
-  my ShowArrows
-  my ShowMove yes
-  my ShufflePieces no $sos
-  set D(idxpce) $sos
-  my InitUndoRedo
-  update
-  my End
-  if {$D(end)} {
-    set D(givingWay) 0
-    incr D(Move) -1
-    my ShowMove
+  set SOSlength [llength $D(SOS)]
+  if {$D(Move) < $SOSlength} {
+    set D(idSOS) [after $timo "[self] HideArrows"]
+    lassign [lindex $D(SOS) end-$D(Move)] sos D(clockwise)
+    set D(clockwise) [expr {-$D(clockwise)}]
+    my ShowArrows
+    my ShowMove yes
+    my ShufflePieces no $sos
+    set D(idxpce) $sos
+    my InitUndoRedo
+    update
+    my End
+    if {$D(Move) == $SOSlength} {my Message {End of the solution!}}
+  } elseif {$SOSlength} {
+    set D(helpingSOS) no  ;# start helping SOS again
+    my SOS
   }
 }
 #_______________________
@@ -815,18 +818,23 @@ method SOS {} {
 method End {} {
   # Checks if the puzzle is solved.
 
-  if {!$D(end)} {
-    if {[my ColorPieces]} {
-      my Message {G R E A T!  YOU DID IT!}
-      set D(end) yes
-    }
+  if {!$D(end) && !$D(helpingSOS) && [my ColorPieces]} {
+    my Message {G R E A T!  YOU DID IT!}
+    set D(end) yes
   }
-  if {$D(end)} {
+  if {[my EndNoSOS]} {
     foreach crc {1 2} {
       set id $D(ID,$D(puzzle)puzzle,crc$crc)
       $Wcan3 itemconfigure $id -outline $BGSUCCESS
     }
   }
+}
+#_______________________
+
+method EndNoSOS {} {
+  # Returns true, if current mode is "End" and not "helping SOS".
+
+  expr $D(end) && !$D(helpingSOS)
 }
 
 ### ________________________ Main functions _________________________ ###
@@ -1017,9 +1025,9 @@ method OnButtonPress {ipce} {
   # Handles the mouse clicking a piece.
   #   ipce - index of piece
 
-  set D(givingWay) [set D(clockwisesaved) 0]
-  if {$D(end)} {
-    my Message {This puzzle has been solved! You might start a new.}
+  set D(clockwisesaved) 0
+  if {[my EndNoSOS]} {
+    my Message {This puzzle has been solved! You might start a new one or Undo/Redo.}
   } else {
     set D(dndXY) [list [winfo pointerx $Win] [winfo pointery $Win] $ipce]
     set D(dndtime) [clock milliseconds]
@@ -1031,7 +1039,7 @@ method OnButtonPress {ipce} {
 method OnButtonMotion {} {
   # Handles the mouse moving over a piece.
 
-  if {$D(dndXY) eq {} || $D(dndtime) eq {} || $D(end)} return
+  if {$D(dndXY) eq {} || $D(dndtime) eq {} || [my EndNoSOS]} return
   set dndtime [clock milliseconds]
   if {($dndtime-$D(dndtime))<30} {
     after idle "[self] OnButtonMotion" ;# to be in time with cursor
@@ -1077,7 +1085,7 @@ method OnButtonRelease {} {
   # Handles the mouse releasing a piece.
 
   my HideArrows
-  if {$D(dndXY) eq {} || $D(dndtime) eq {} || $D(end)} return
+  if {$D(dndXY) eq {} || $D(dndtime) eq {} || [my EndNoSOS]} return
   lassign $D(dndXY) x y id
   set D(dndXY) [set D(dndtime) {}]
   # place all pieces to their regular coordinates
@@ -1132,15 +1140,15 @@ method AddUndoRedo {} {
 method CheckUndoRedo {} {
   # Checks availability of undo/redo.
 
-  if {[lindex $D(History) $D(Move)-2] ne {}} {
-    $Wcan2.butUndo configure -state normal
-  } else {
+  if {[lindex $D(History) $D(Move)-2] eq {} || $D(helpingSOS)} {
     $Wcan2.butUndo configure -state disabled
-  }
-  if {[lindex $D(History) $D(Move)] ne {}} {
-    $Wcan2.butRedo configure -state normal
   } else {
+    $Wcan2.butUndo configure -state normal
+  }
+  if {[lindex $D(History) $D(Move)] eq {} || $D(helpingSOS)} {
     $Wcan2.butRedo configure -state disabled
+  } else {
+    $Wcan2.butRedo configure -state normal
   }
 }
 #_______________________
@@ -1229,14 +1237,14 @@ method HideArrows {} {
 
 ## ________________________ Messages _________________________ ##
 
-method Message {msg {wait 30} {doit no}} {
+method Message {msg {wait 30} {doit no} {sos no}} {
   # Shows a message.
   #   msg - message's text
   #   wait - time to wait in 0.2 sec.
   #   doit - internally used by itself
 
-  if {[$Wcan3 itemcget $D(PuzzledID) -fill] eq $BGMSG} return
   catch {  ;# the method can be called after destroying Puzzle object => catch
+    if {$sos && $D(helpingSOS)} return
     set D(msg) {}
     catch {$Wcan4 delete $D(idmsg)}
     catch {after cancel $D(idafter)}
