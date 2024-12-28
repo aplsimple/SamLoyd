@@ -1027,7 +1027,7 @@ method OnButtonPress {ipce} {
   # Handles the mouse clicking a piece.
   #   ipce - index of piece
 
-  set D(clockwisesaved) 0
+  set D(clockwisesaved) [set D(clockwise) 0]
   if {[my EndNoSOS]} {
     my Message {This puzzle has been solved! You might start a new one or Undo/Redo.}
   } else {
