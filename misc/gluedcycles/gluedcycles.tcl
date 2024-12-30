@@ -17,7 +17,7 @@ namespace eval gluedcycles {
     #   rcfile - .rc file
     #   solo - true, if runs as stand-alone app
 
-    if {[string is digit $rcfile]} { ;# obsolete call
+    if {[string length $rcfile]<2} { ;# for obsolete call
       set rcfile [file normalize [info script]]
       set rcfile [string range $rcfile 0 end-4].rc
     }
@@ -417,7 +417,7 @@ method BuildPuzzle {} {
   my BuildPuzzleBox P6 menu $FGCIRCLE1 $FGCIRCLE2 "700 730" $zoom
   my BuildPuzzleBox P7 menu $FGCIRCLE1 $FGCIRCLE2 "$margin 1100" $zoom
   my BuildPuzzleBox P8 menu $FGCIRCLE1 $FGCIRCLE2 "700 1130" $zoom
-  $Wcan3 create text 130 350 -text "Selected" -fill $BGPENDING -font $FONTSMALL
+  $Wcan3 create text 130 350 -text "Patterns" -fill $BGPENDING -font $FONTSMALL
   $Wcan3 create text 370 350 -text "Wanted" -fill $BGSUCCESS -font $FONTSMALL
   set D(PuzzledLabel) "Puzzled"
   set D(PuzzledID) [$Wcan3 create text 750 350 -text $D(PuzzledLabel) \
@@ -622,18 +622,6 @@ method BindPiece {id ipce} {
   $Wcan3 bind $id <Motion> "[self] OnButtonMotion"
 }
 #_______________________
-
-method ItemCenterXY {ID X Y} {
-  # Gets X, Y of item center
-  #   ID - id of item
-  #   X - X coordinate of item
-  #   Y - Y coordinate of item
-
-  lassign [$Wcan3 bbox $ID] x1 y1 x2 y2
-  set X [expr {$X-($x2-$x1)/2+1}]
-  set Y [expr {$Y-($y2-$y1)/2+1}]
-  list $X $Y
-}
 
 ## ________________________ Managing _________________________ ##
 
@@ -900,9 +888,9 @@ method ShufflePieces {{doshuffle yes} {pattern ""}} {
   # update texts (numbers) & coordinates of pattern
   for {set ipce 1} {$ipce<=$numpce} {incr ipce} {
     $Wcan3 itemconfigure $D(ID,puzzle,txt$ipce) -text [lindex $D(idxpce) $ipce-1]
-    lassign [lindex $D(coords) $ipce-1] -> id1 id2 x y
-    lassign [my ItemCenterXY $id2 $x $y] x y
-    $Wcan3 moveto $id2 $x $y
+    lassign [lindex $D(coords) $ipce-1] - - id2 x2 y2
+    lassign [$Wcan3 coords $id2] x y
+    $Wcan3 move $id2 [expr $x2-$x] [expr $y2-$y]
   }
   if {$doshuffle eq {false}} {
     # if run with "Start" button, blink Puzzled
@@ -1191,21 +1179,8 @@ method ShowArrow {i j} {
   set Y1 [expr {$y1 + $k*($y2 - $y1)}]
   set X2 [expr {$x2 - $k*($x2 - $x1)}]
   set Y2 [expr {$y2 - $k*($y2 - $y1)}]
-  set k 0.61
-  set z [expr {$k*$d}]
-  set z2 [expr {$z/8}]
-  set X [expr {$x1 + $k*($x2 - $x1)}]
-  set Y [expr {$y1 + $k*($y2 - $y1)}]
-  set cosA [expr {($x2 - $x1)/$d}]
-  set sinA [expr {($y2 - $y1)/$d}]
-  set XA [expr {$X - $z2*$sinA}]
-  set YA [expr {$Y + $z2*$cosA}]
-  set XB [expr {$X + $z2*$sinA}]
-  set YB [expr {$Y - $z2*$cosA}]
-  set D(arrow,1,$i) [$Wcan3 create polygon $X1 $Y1 $X2 $Y2 \
-    -outline $BGPENDING2 -fill $BGPENDING2 -width 5]
-  set D(arrow,2,$i) [$Wcan3 create polygon $X2 $Y2 $XB $YB $XA $YA \
-    -outline $BGPENDING2 -fill $BGPENDING2 -width 3]
+  set D(arrow,1,$i) [$Wcan3 create line $X1 $Y1 $X2 $Y2 -fill $BGPENDING2 \
+    -width 5 -arrow last -arrowshape {16 16 6}]
 }
 #_______________________
 
