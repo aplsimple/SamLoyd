@@ -352,6 +352,7 @@ constructor {wpar rcfile solo} {
   wm deiconify $Win
   tkwait visibility $Win
   tkwait window $Win
+  my SaveState
 }
 #_______________________
 

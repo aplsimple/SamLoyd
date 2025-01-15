@@ -1,6 +1,11 @@
 # LAST CHANGES
 
 
+`10 Jan'25`
+
+  - CHANGE: SaveState be the last command
+
+
 `28 Dec'24`
 
   - CHANGE: undo/redo & stupid solution to be friends
