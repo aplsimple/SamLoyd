@@ -90,7 +90,6 @@ rAQ/Y2mg8VAAmIJWKVBBtm5yqKS0iCxQQYZnAJ8wMxMihEvMnEzT40MUhZm5mRg1jHxrQqRY2ZHC
 SCDazCndIJyFTQIcm55NxhAmwoa5ZgUG4bIQMxm1OnUgxiOieIaZSZ0jC0yQUxBiPAKozDZrDxAU
 h2li4pZAi2al6EgDHTle3KlQZ05qiAw7Ax4FmgZ8bEz4knFBEAs+Axin+xqzquNTMM1PkhlvVsoN
 YOHGr8BRhBevAmMdNga8QJUVnx8AecZkFWbl0sMAAAAASUVORK5CYII=}
-
   image create photo gluedcycles::download -data  {iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAABtlBMVEUAAADDAADLAAC5AADzAAGO
 OSWkAQDYAACQOCWyAgC4AADqAAKNMh+KKxjHAwfcAATuAALNAAKFKBKPNSKMMBuIKBSSNybnAAWK
 FQZ7EwB9IQiHCwCNNiGKFQOONiOfEQi1BQKvMTP/GTHlGSm1GR/XFB7KEhvZCxKxFxe2DAmNDgST
@@ -622,7 +621,6 @@ method BindPiece {id ipce} {
   $Wcan3 bind $id <ButtonRelease> "[self] OnButtonRelease"
   $Wcan3 bind $id <Motion> "[self] OnButtonMotion"
 }
-#_______________________
 
 ## ________________________ Managing _________________________ ##
 
