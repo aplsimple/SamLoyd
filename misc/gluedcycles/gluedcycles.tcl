@@ -435,17 +435,17 @@ method BuildAccessories {} {
   $Wcan1 create text [expr {$WIDTH/2}] 30 -text $TITLE -fill $BGMSG -font $FONTLARGE
   set shift 40
   set pad2 [expr {$MARGIN/2 - 2}]
-  grid [button $Wcan2.butRun -image gluedcycles::runImage -bg $BGCANVAS \
-    -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
-    -highlightcolor $BGMSG -command "[self] Start {} false"] -padx $MARGIN
-  grid [label $Wcan2.lab -text Difficulty -fg $BGWAIT -bg $BGCANVAS] -row 0 -column 1
+  grid [label $Wcan2.lab -text Difficulty: -fg $BGWAIT -bg $BGCANVAS] -padx $MARGIN
   grid [entry $Wcan2.butEnt -fg $BGWAIT -bg $BGCANVAS -width 3 \
     -highlightcolor $BGMSG -insertbackground white -textvariable \
     [namespace current]::Difficulty -justify center -validate key \
-    -validatecommand "[self] CheckDifficulty %d %S"] \
-    -row 0 -column 2 -sticky w -padx 8
-  grid [label $Wcan2.space -text { } -bg $BGCANVAS] -row 0 -column 3 -sticky ew
-  grid columnconfigure $Wcan2 3 -weight 9
+    -validatecommand "[self] CheckDifficulty %d %S"] -row 0 -column 1
+  grid [label $Wcan2.space -text { } -bg $BGCANVAS] -row 0 -column 2 -sticky ew
+  grid columnconfigure $Wcan2 2 -weight 9
+  grid [button $Wcan2.butRun -image gluedcycles::runImage -bg $BGCANVAS \
+    -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
+    -highlightcolor $BGMSG -command "[self] Start {} false"] \
+    -padx $MARGIN -row 0 -column 3
   grid [button $Wcan2.butUp -image gluedcycles::upload -bg $BGCANVAS \
     -activebackground $BGWAIT2 -highlightbackground $BGCANVAS \
     -highlightcolor $BGMSG -command "[self] State w"] -row 0 -column 4
