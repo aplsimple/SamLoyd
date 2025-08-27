@@ -25,6 +25,8 @@ where
   - puzzle - name of puzzle
   - args - optional arguments
 
+There are also [executable files](https://github.com/aplsimple/SamLoyd/releases/tag/executables-v1.0) for various platforms. They are simply unpacked and run "as is".
+
 # Where to get Tcl/Tk
 
 If [Tcl/Tk](http://www.tcl.tk/) interpreter isn't installed on your platform, you can download it through the links below.

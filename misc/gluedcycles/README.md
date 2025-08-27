@@ -26,9 +26,12 @@ The puzzle can be run so:
 
 where RESOURCE - path to .rc file, by default *./gluedcycles.rc*
 
+There are also [executable files](https://github.com/aplsimple/SamLoyd/releases/tag/executables-v1.0) for various platforms. They are simply unpacked and run "as is".
+
 
 # Links
 
+   * [Executables](https://github.com/aplsimple/SamLoyd/releases/tag/executables-v1.0)
    * [Chiselapp repository](http://chiselapp.com/user/aplsimple/repository/SamLoyd/index)
    * [Github repository](https://github.com/aplsimple/SamLoyd)
 

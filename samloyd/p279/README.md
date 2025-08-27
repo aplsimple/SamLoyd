@@ -19,9 +19,12 @@ The puzzle can be run so:
 
 where NP - number of pieces from 8 to 24, by default 12.
 
+There are also [executable files](https://github.com/aplsimple/SamLoyd/releases/tag/executables-v1.0) for various platforms. They are simply unpacked and run "as is".
+
 
 # Links
 
+   * [Executables](https://github.com/aplsimple/SamLoyd/releases/tag/executables-v1.0)
    * [Chiselapp repository](http://chiselapp.com/user/aplsimple/repository/SamLoyd/index)
    * [Github repository](https://github.com/aplsimple/SamLoyd)
 

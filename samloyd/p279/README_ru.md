@@ -21,11 +21,14 @@
 
 Пакет *wish* можно установить на своем компьютере отдельно, он весит совсем мало.
 
+Есть также [исполняемые файлы](https://github.com/aplsimple/SamLoyd/releases/tag/executables-v1.0) для различных платформ. Они просто распаковываются и запускаются "как есть".
+
 
 # Ссылки
 
-   * [Chiselapp repository](http://chiselapp.com/user/aplsimple/repository/SamLoyd/index)
-   * [Github repository](https://github.com/aplsimple/SamLoyd)
+   * [Исполняемые файлы](https://github.com/aplsimple/SamLoyd/releases/tag/executables-v1.0)
+   * [Репозиторий на Chiselapp](http://chiselapp.com/user/aplsimple/repository/SamLoyd/index)
+   * [Репозиторий на Github](https://github.com/aplsimple/SamLoyd)
 
 
 # Картинки
